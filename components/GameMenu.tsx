@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { GameId } from '../types';
 import GameCard from './GameCard';
@@ -14,7 +15,8 @@ const TableCellsIcon = <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w
 const Game2048Icon = <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h12a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 12h4m-4 4h4m-4-8h4" /></svg>;
 const PaperAirplaneIcon = <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>;
 
-const games = [
+// Fix: Explicitly type the games array to ensure `game.id` is of type `GameId`.
+const games: { id: GameId; title: string; description: string; icon: React.ReactNode }[] = [
     { id: 'reaction-time', title: 'Reaction Time', description: 'Test your reflexes. Click when the box turns green!', icon: BoltIcon },
     { id: 'memory-match', title: 'Memory Match', description: 'Flip cards and find all the matching pairs.', icon: CpuChipIcon },
     { id: 'typing-speed', title: 'Typing Speed', description: 'How fast can you type? Test your WPM.', icon: ChartBarIcon },

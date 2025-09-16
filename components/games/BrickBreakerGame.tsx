@@ -1,8 +1,10 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import useInterval from '../../hooks/useInterval';
 import StyledButton from '../StyledButton';
 import useLocalStorage from '../../hooks/useLocalStorage';
-import { playSuccessSound, playErrorSound, playWinSound } from '../../utils/audio';
+// Fix: Import `playClickSound` to be used for paddle collision sound.
+import { playSuccessSound, playErrorSound, playWinSound, playClickSound } from '../../utils/audio';
 
 interface BrickBreakerGameProps {
   onBack: () => void;

@@ -12,6 +12,7 @@ import BrickBreakerGame from './components/games/BrickBreakerGame';
 import Game2048 from './components/games/Game2048';
 import FlappyBirdGame from './components/games/FlappyBirdGame';
 import { GameId } from './types';
+import Footer from './components/Footer';
 
 const App: React.FC = () => {
   const [selectedGame, setSelectedGame] = useState<GameId | null>(null);
@@ -52,12 +53,13 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="bg-slate-900 text-white min-h-screen flex flex-col items-center justify-center p-4 font-sans">
-      <div className="w-full max-w-5xl mx-auto">
+    <div className="bg-slate-900 text-white min-h-screen flex flex-col items-center p-4 font-sans">
+      <div className="w-full max-w-5xl mx-auto flex flex-col flex-grow">
         <Header title="Mini-Game Hub" />
-        <main className="mt-12">
+        <main className="mt-12 flex-grow flex items-center justify-center">
           {renderGame()}
         </main>
+        <Footer />
       </div>
     </div>
   );
