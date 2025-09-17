@@ -127,7 +127,7 @@ const SnakeGame: React.FC<SnakeGameProps> = ({ onBack, onNewHighScore }) => {
         {snake.map((segment, index) => (
           <div
             key={index}
-            className={`absolute rounded-sm ${index === 0 ? 'bg-green-400 shadow-[0_0_10px_theme(colors.green.400)]' : 'bg-green-600'}`}
+            className={`absolute rounded-sm ${index === 0 ? 'bg-green-400 shadow-[0_0_10px_hsl(142,71%,45%)]' : 'bg-green-600'}`}
             style={{ 
               left: `${(segment.x / GRID_SIZE) * 100}%`, 
               top: `${(segment.y / GRID_SIZE) * 100}%`, 
@@ -137,7 +137,7 @@ const SnakeGame: React.FC<SnakeGameProps> = ({ onBack, onNewHighScore }) => {
           />
         ))}
         <div
-          className="absolute bg-red-500 rounded-full shadow-[0_0_10px_theme(colors.red.500)]"
+          className="absolute bg-red-500 rounded-full shadow-[0_0_10px_hsl(0,84%,60%)]"
           style={{ 
             left: `${(food.x / GRID_SIZE) * 100}%`, 
             top: `${(food.y / GRID_SIZE) * 100}%`, 

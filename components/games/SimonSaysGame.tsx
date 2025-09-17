@@ -99,10 +99,10 @@ const SimonSaysGame: React.FC<SimonSaysGameProps> = ({ onBack, onNewHighScore })
   };
 
   const colorClasses: { [key: string]: string } = {
-    green: 'bg-green-500 hover:bg-green-400 shadow-[0_0_20px_theme(colors.green.500/80%)]',
-    red: 'bg-red-500 hover:bg-red-400 shadow-[0_0_20px_theme(colors.red.500/80%)]',
-    yellow: 'bg-yellow-500 hover:bg-yellow-400 shadow-[0_0_20px_theme(colors.yellow.500/80%)]',
-    blue: 'bg-blue-500 hover:bg-blue-400 shadow-[0_0_20px_theme(colors.blue.500/80%)]',
+    green: 'bg-green-500 hover:bg-green-400 shadow-[0_0_20px_hsla(142,69%,39%,0.8)]',
+    red: 'bg-red-500 hover:bg-red-400 shadow-[0_0_20px_hsla(0,84%,60%,0.8)]',
+    yellow: 'bg-yellow-500 hover:bg-yellow-400 shadow-[0_0_20px_hsla(48,96%,53%,0.8)]',
+    blue: 'bg-blue-500 hover:bg-blue-400 shadow-[0_0_20px_hsla(217,91%,60%,0.8)]',
   };
   
   const activeColorClasses: { [key: string]: string } = {

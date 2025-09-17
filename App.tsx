@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useCallback, lazy, Suspense } from 'react';
 import { GameId } from './types';
-import { GoogleGenAI, GenerateContentResponse } from '@google/genai';
+import { GoogleGenAI, type GenerateContentResponse } from '@google/genai';
 
 // Components
 import Header from './components/Header';
@@ -51,9 +51,9 @@ const App: React.FC = () => {
     setSelectedGame(gameId);
   };
 
-  const handleBackToMenu = () => {
+  const handleBackToMenu = useCallback(() => {
     setSelectedGame(null);
-  };
+  }, []);
 
   const handleNewHighScore = useCallback(async (gameName: string, score: number | string) => {
     setIsGeneratingMessage(true);
@@ -103,7 +103,7 @@ const App: React.FC = () => {
     'time-warp-pinball': <TimeWarpPinballGame onBack={handleBackToMenu} />,
     'stack-n-balance': <StackNBalanceGame onBack={handleBackToMenu} />,
     'path-finder': <PathFinderGame onBack={handleBackToMenu} />,
-  }), [handleNewHighScore]);
+  }), [handleNewHighScore, handleBackToMenu]);
 
   const CurrentGame = useMemo(() => {
     if (!selectedGame) return null;
