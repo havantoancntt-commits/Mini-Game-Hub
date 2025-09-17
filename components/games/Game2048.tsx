@@ -1,224 +1,193 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import StyledButton from '../StyledButton';
 import useLocalStorage from '../../hooks/useLocalStorage';
-import { playSuccessSound, playWinSound, playGameOverSound } from '../../utils/audio';
+import { playGameOverSound } from '../../utils/audio';
 
 interface Game2048Props {
   onBack: () => void;
+  onNewHighScore: (gameName: string, score: number) => void;
 }
+
+type TileValue = number;
+type Grid = TileValue[][];
 
 const GRID_SIZE = 4;
 
-type Grid = number[][];
-
-const Game2048: React.FC<Game2048Props> = ({ onBack }) => {
+const Game2048: React.FC<Game2048Props> = ({ onBack, onNewHighScore }) => {
   const [grid, setGrid] = useState<Grid>(() => createEmptyGrid());
   const [score, setScore] = useState(0);
+  const [highScore, setHighScore] = useLocalStorage('2048-highscore', 0);
   const [isGameOver, setIsGameOver] = useState(false);
-  const [highScore, setHighScore] = useLocalStorage('2048-hs', 0);
+  const scoreKey = React.useMemo(() => Date.now(), [score]);
 
-  function createEmptyGrid(): Grid {
-    return Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill(0));
-  }
+  const createEmptyGrid = (): Grid => Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill(0));
 
-  const addNumber = useCallback((grid: Grid): Grid => {
-    const newGrid = grid.map(row => [...row]);
-    const emptyCells: {r: number, c: number}[] = [];
-    for(let r = 0; r < GRID_SIZE; r++) {
-        for(let c = 0; c < GRID_SIZE; c++) {
-            if(newGrid[r][c] === 0) {
-                emptyCells.push({r, c});
-            }
-        }
-    }
-    
-    if (emptyCells.length > 0) {
-        const {r, c} = emptyCells[Math.floor(Math.random() * emptyCells.length)];
-        newGrid[r][c] = Math.random() > 0.9 ? 4 : 2;
-    }
+  const addRandomTile = (currentGrid: Grid): Grid => {
+    let emptyTiles: { r: number; c: number }[] = [];
+    currentGrid.forEach((row, r) => {
+      row.forEach((val, c) => {
+        if (val === 0) emptyTiles.push({ r, c });
+      });
+    });
 
+    if (emptyTiles.length === 0) return currentGrid;
+
+    const { r, c } = emptyTiles[Math.floor(Math.random() * emptyTiles.length)];
+    const newGrid = currentGrid.map(row => [...row]);
+    newGrid[r][c] = Math.random() < 0.9 ? 2 : 4;
     return newGrid;
-  }, []);
-
-  const checkGameOver = (currentGrid: Grid): boolean => {
-    for (let r = 0; r < GRID_SIZE; r++) {
-        for (let c = 0; c < GRID_SIZE; c++) {
-            if (currentGrid[r][c] === 0) return false;
-            if (r < GRID_SIZE - 1 && currentGrid[r][c] === currentGrid[r + 1][c]) return false;
-            if (c < GRID_SIZE - 1 && currentGrid[r][c] === currentGrid[r][c + 1]) return false;
-        }
-    }
-    return true;
   };
 
   const resetGame = useCallback(() => {
     let newGrid = createEmptyGrid();
-    newGrid = addNumber(newGrid);
-    newGrid = addNumber(newGrid);
+    newGrid = addRandomTile(newGrid);
+    newGrid = addRandomTile(newGrid);
     setGrid(newGrid);
     setScore(0);
     setIsGameOver(false);
-  }, [addNumber]);
+  }, []);
 
-  useEffect(() => {
-    resetGame();
-  }, [resetGame]);
+  const checkGameOver = (currentGrid: Grid): boolean => {
+    for (let r = 0; r < GRID_SIZE; r++) {
+      for (let c = 0; c < GRID_SIZE; c++) {
+        if (currentGrid[r][c] === 0) return false;
+        if (r < GRID_SIZE - 1 && currentGrid[r][c] === currentGrid[r + 1][c]) return false;
+        if (c < GRID_SIZE - 1 && currentGrid[r][c] === currentGrid[r][c + 1]) return false;
+      }
+    }
+    return true;
+  };
 
-  const move = useCallback((direction: 'up' | 'down' | 'left' | 'right') => {
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
     if (isGameOver) return;
-    
-    let moved = false;
-    let tempGrid = grid.map(row => [...row]);
+
+    let direction: 'up' | 'down' | 'left' | 'right' | null = null;
+    switch (e.key) {
+      case 'ArrowUp': direction = 'up'; break;
+      case 'ArrowDown': direction = 'down'; break;
+      case 'ArrowLeft': direction = 'left'; break;
+      case 'ArrowRight': direction = 'right'; break;
+      default: return;
+    }
+    e.preventDefault();
+
+    let oldGrid = JSON.stringify(grid);
+    let newGrid = grid.map(row => [...row]);
     let newScore = score;
-    
-    const slide = (row: number[]) => {
+
+    const slide = (row: TileValue[]) => {
       let arr = row.filter(val => val);
       let missing = GRID_SIZE - arr.length;
       let zeros = Array(missing).fill(0);
       return arr.concat(zeros);
     };
 
-    const combine = (row: number[]) => {
+    const combine = (row: TileValue[]) => {
       for (let i = 0; i < GRID_SIZE - 1; i++) {
         if (row[i] !== 0 && row[i] === row[i + 1]) {
           row[i] *= 2;
           newScore += row[i];
           row[i + 1] = 0;
-          moved = true; // This should be inside combine to detect merges
-          playSuccessSound();
         }
       }
       return row;
     };
-    
-    const rotateRight = (matrix: Grid) => {
-        let result = createEmptyGrid();
-        for (let r = 0; r < GRID_SIZE; r++) {
-            for (let c = 0; c < GRID_SIZE; c++) {
-                result[c][GRID_SIZE - 1 - r] = matrix[r][c];
-            }
-        }
-        return result;
-    };
-    
-    const isChanged = (original: Grid, newGrid: Grid) => {
+
+    const rotateGrid = (g: Grid) => {
+      let rotated = createEmptyGrid();
       for (let r = 0; r < GRID_SIZE; r++) {
         for (let c = 0; c < GRID_SIZE; c++) {
-          if (original[r][c] !== newGrid[r][c]) return true;
+          rotated[c][GRID_SIZE - 1 - r] = g[r][c];
         }
       }
-      return false;
+      return rotated;
     };
 
-    const operate = (grid: Grid) => {
-        return grid.map(row => {
-            const originalRow = [...row];
-            let newRow = slide(row);
-            newRow = combine(newRow);
-            newRow = slide(newRow);
-            if (!moved) {
-                moved = originalRow.join(',') !== newRow.join(',');
-            }
-            return newRow;
-        });
-    };
-
-    if (direction === 'left') {
-        tempGrid = operate(tempGrid);
-    } else if (direction === 'right') {
-        tempGrid = tempGrid.map(row => row.reverse());
-        tempGrid = operate(tempGrid);
-        tempGrid = tempGrid.map(row => row.reverse());
-    } else if (direction === 'up') {
-        tempGrid = rotateRight(rotateRight(rotateRight(tempGrid)));
-        tempGrid = operate(tempGrid);
-        tempGrid = rotateRight(tempGrid);
-    } else if (direction === 'down') {
-        tempGrid = rotateRight(tempGrid);
-        tempGrid = operate(tempGrid);
-        tempGrid = rotateRight(rotateRight(rotateRight(tempGrid)));
-    }
-
-    if (moved) {
-      const newGridWithNumber = addNumber(tempGrid);
-      setGrid(newGridWithNumber);
-      setScore(newScore);
-      if(newScore > highScore) {
-        setHighScore(newScore);
+    if (direction === 'left' || direction === 'right') {
+      for (let r = 0; r < GRID_SIZE; r++) {
+        let row = newGrid[r];
+        if (direction === 'right') row.reverse();
+        row = slide(combine(slide(row)));
+        if (direction === 'right') row.reverse();
+        newGrid[r] = row;
       }
-      if (checkGameOver(newGridWithNumber)) {
-          setIsGameOver(true);
-          playGameOverSound();
+    } else { // up or down
+      newGrid = rotateGrid(newGrid);
+      if (direction === 'down') newGrid = rotateGrid(rotateGrid(newGrid));
+      for (let r = 0; r < GRID_SIZE; r++) {
+        let row = newGrid[r];
+        row = slide(combine(slide(row)));
+        newGrid[r] = row;
       }
+      if (direction === 'down') newGrid = rotateGrid(rotateGrid(newGrid));
+      newGrid = rotateGrid(newGrid);
     }
-  }, [grid, isGameOver, score, highScore, setHighScore, addNumber]);
+    
+    setScore(newScore);
+    if (JSON.stringify(newGrid) !== oldGrid) {
+      newGrid = addRandomTile(newGrid);
+    }
+    
+    setGrid(newGrid);
+
+    if (checkGameOver(newGrid)) {
+        setIsGameOver(true);
+        playGameOverSound();
+        if(newScore > highScore) {
+            setHighScore(newScore);
+            onNewHighScore('2048', newScore);
+        }
+    }
+  }, [grid, isGameOver, score, highScore, onNewHighScore, setHighScore]);
 
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      e.preventDefault();
-      switch (e.key) {
-        case 'ArrowUp': move('up'); break;
-        case 'ArrowDown': move('down'); break;
-        case 'ArrowLeft': move('left'); break;
-        case 'ArrowRight': move('right'); break;
-      }
-    };
+    resetGame();
+  }, [resetGame]);
+
+  useEffect(() => {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [move]);
+  }, [handleKeyDown]);
 
-  const getTileColor = (value: number) => {
-    const baseStyle = 'shadow-[inset_0_2px_4px_rgba(0,0,0,0.3)] ';
-    switch (value) {
-      case 2: return baseStyle + 'bg-slate-700';
-      case 4: return baseStyle + 'bg-slate-600';
-      case 8: return baseStyle + 'bg-cyan-800 text-slate-100';
-      case 16: return baseStyle + 'bg-cyan-700 text-slate-100';
-      case 32: return baseStyle + 'bg-cyan-600 text-slate-100';
-      case 64: return baseStyle + 'bg-cyan-500 text-slate-100';
-      case 128: return baseStyle + 'bg-fuchsia-800 text-slate-100';
-      case 256: return baseStyle + 'bg-fuchsia-700 text-slate-100';
-      case 512: return baseStyle + 'bg-fuchsia-600 text-slate-100';
-      case 1024: return baseStyle + 'bg-yellow-500 text-slate-900';
-      case 2048: return baseStyle + 'bg-yellow-400 text-slate-900 animate-pulse-glow-yellow';
-      default: return 'bg-slate-800';
-    }
+  const tileColors: { [key: number]: string } = {
+    0: 'bg-slate-700', 2: 'bg-slate-600', 4: 'bg-slate-500',
+    8: 'bg-orange-500', 16: 'bg-orange-400', 32: 'bg-red-500',
+    64: 'bg-red-400', 128: 'bg-yellow-500', 256: 'bg-yellow-400',
+    512: 'bg-yellow-300', 1024: 'bg-teal-500',
+    2048: 'bg-teal-400 animate-pulse-glow-yellow'
   };
 
   return (
-    <div className="flex flex-col items-center">
-      <div className="mb-4 flex justify-between w-full max-w-sm text-xl font-bold text-slate-300">
-        <div>Score: <span className="text-white animate-score-pop" key={score}>{score}</span></div>
-        <div>Best: <span className="text-yellow-400">{highScore}</span></div>
+    <div className="flex flex-col items-center p-4 w-full max-w-md mx-auto text-center animate-fade-in-up">
+      <h2 className="text-4xl font-bold mb-2">2048</h2>
+      <p className="text-slate-400 mb-4">Use arrow keys to slide and combine tiles.</p>
+       <div className="flex gap-8 mb-4">
+          <p>Score: <span key={scoreKey} className="font-bold text-cyan-400 animate-score-pop">{score}</span></p>
+          <p>High Score: <span className="font-bold text-yellow-400">{highScore}</span></p>
       </div>
-      <div className="bg-slate-700 p-2 rounded-lg relative">
+      <div className="bg-slate-800 p-2 rounded-lg relative grid grid-cols-4 gap-2">
         {isGameOver && (
-          <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center text-center z-10 animate-fade-in">
-            <h2 className="text-4xl font-extrabold text-red-500 mb-4">Game Over</h2>
-            <StyledButton onClick={resetGame}>Play Again</StyledButton>
+          <div className="absolute inset-0 bg-black bg-opacity-70 flex flex-col items-center justify-center z-10 rounded-lg">
+            <h3 className="text-3xl font-bold text-red-500 mb-4">Game Over!</h3>
+            <StyledButton onClick={resetGame}>Try Again</StyledButton>
           </div>
         )}
-        {grid.map((row, rIndex) => (
-          <div key={rIndex} className="flex gap-2 mb-2 last:mb-0">
-            {row.map((cell, cIndex) => (
-              <div key={cIndex} className={`w-20 h-20 sm:w-24 sm:h-24 rounded-md flex items-center justify-center text-3xl sm:text-4xl font-bold transition-all duration-200 ${getTileColor(cell)}`}>
-                {cell > 0 && cell}
-              </div>
-            ))}
-          </div>
-        ))}
+        {grid.map((row, r) =>
+          row.map((val, c) => (
+            <div
+              key={`${r}-${c}`}
+              className={`w-20 h-20 md:w-24 md:h-24 flex items-center justify-center rounded-md font-bold text-3xl
+                         transition-all duration-200 shadow-inner shadow-black/20 ${tileColors[val] || 'bg-teal-300'}`}
+            >
+              {val > 0 && val}
+            </div>
+          ))
+        )}
       </div>
-       <div className="mt-8">
-        <StyledButton onClick={resetGame}>New Game</StyledButton>
-      </div>
-      <div className="mt-8 text-center text-slate-400">
-        <p>Use Arrow Keys to move tiles.</p>
-      </div>
-      <div className="mt-8">
-        <button onClick={onBack} className="text-slate-400 hover:text-cyan-400 transition-colors">
-          &larr; Back to Menu
-        </button>
-      </div>
+
+      <button onClick={onBack} className="mt-12 text-slate-400 hover:text-cyan-400 transition-colors">
+        &larr; Back to Menu
+      </button>
     </div>
   );
 };

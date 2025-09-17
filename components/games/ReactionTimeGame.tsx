@@ -1,113 +1,115 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import StyledButton from '../StyledButton';
-import useLocalStorage from '../../hooks/useLocalStorage';
 import { playSuccessSound, playErrorSound } from '../../utils/audio';
+import useLocalStorage from '../../hooks/useLocalStorage';
 
 interface ReactionTimeGameProps {
   onBack: () => void;
+  onNewHighScore: (gameName: string, score: string) => void;
 }
 
-type GameState = 'waiting' | 'ready' | 'active' | 'result';
+type GameState = 'idle' | 'waiting' | 'ready' | 'result' | 'too-soon';
 
-const ReactionTimeGame: React.FC<ReactionTimeGameProps> = ({ onBack }) => {
-  const [gameState, setGameState] = useState<GameState>('waiting');
-  const [startTime, setStartTime] = useState<number>(0);
-  const [score, setScore] = useState<number | null>(null);
-  const [isNewHighScore, setIsNewHighScore] = useState(false);
-  const [highScore, setHighScore] = useLocalStorage('reaction-time-hs', Infinity);
-  
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+const ReactionTimeGame: React.FC<ReactionTimeGameProps> = ({ onBack, onNewHighScore }) => {
+  const [gameState, setGameState] = useState<GameState>('idle');
+  const [reactionTime, setReactionTime] = useState<number | null>(null);
+  const [bestTime, setBestTime] = useLocalStorage<number | null>('reaction-time-highscore', null);
+  // Fix: Initialize useRef with null and use the correct 'number' type for browser setTimeout.
+  const timerRef = useRef<number | null>(null);
+  const startTimeRef = useRef<number>(0);
 
-  const startGame = useCallback(() => {
-    setIsNewHighScore(false);
-    setGameState('ready');
-    setScore(null);
-    const delay = Math.random() * 3000 + 1000; // 1-4 seconds
-    timerRef.current = setTimeout(() => {
-      setGameState('active');
-      setStartTime(Date.now());
-    }, delay);
-  }, []);
+  const start = () => {
+    setGameState('waiting');
+    setReactionTime(null);
+    timerRef.current = window.setTimeout(() => {
+      startTimeRef.current = Date.now();
+      setGameState('ready');
+    }, Math.random() * 2000 + 1000);
+  };
 
-  const handleBoxClick = () => {
-    if (gameState === 'active') {
-      const endTime = Date.now();
-      const currentScore = endTime - startTime;
-      setScore(currentScore);
-      playSuccessSound();
-      if (currentScore < highScore) {
-        setHighScore(currentScore);
-        setIsNewHighScore(true);
+  const handleClick = () => {
+    if (gameState === 'waiting') {
+      if (timerRef.current) {
+        window.clearTimeout(timerRef.current);
       }
-      setGameState('result');
-    } else if (gameState === 'ready') {
-      if (timerRef.current) clearTimeout(timerRef.current);
+      setGameState('too-soon');
       playErrorSound();
-      setScore(-1); 
+    }
+    if (gameState === 'ready') {
+      const endTime = Date.now();
+      const time = endTime - startTimeRef.current;
+      setReactionTime(time);
       setGameState('result');
+      playSuccessSound();
+
+      if (bestTime === null || time < bestTime) {
+        setBestTime(time);
+        onNewHighScore('Reaction Time', `${time}ms`);
+      }
     }
   };
   
   useEffect(() => {
-    // Cleanup timeout on unmount
     return () => {
-      if (timerRef.current) {
-        clearTimeout(timerRef.current);
+      if(timerRef.current) {
+        window.clearTimeout(timerRef.current);
       }
-    };
+    }
   }, []);
-  
+
   const renderContent = () => {
-    switch(gameState) {
+    switch (gameState) {
+      case 'idle':
+        return <StyledButton onClick={start}>Start Game</StyledButton>;
       case 'waiting':
-        return (
-          <div className="text-center animate-pop-in">
-            <h2 className="text-3xl font-bold mb-4">Get Ready</h2>
-            <p className="text-slate-400 mb-8">Click the box when it turns <span className="text-emerald-400 font-bold">green</span>. Don't click too early!</p>
-            {highScore !== Infinity && (
-              <p className="text-lg text-yellow-400 mb-8">Best Time: {highScore}ms</p>
-            )}
-            <StyledButton onClick={startGame}>Start Game</StyledButton>
-          </div>
-        );
+        return <p className="text-2xl">Wait for green...</p>;
       case 'ready':
+        return <p className="text-4xl font-bold animate-pulse">CLICK!</p>;
+      case 'too-soon':
         return (
-          <div className="w-full h-64 bg-red-500 rounded-lg flex items-center justify-center cursor-pointer transition-colors duration-200" onClick={handleBoxClick}>
-            <p className="text-3xl font-bold text-white animate-pulse">Wait for Green...</p>
-          </div>
-        );
-      case 'active':
-        return (
-          <div className="w-full h-64 bg-emerald-400 rounded-lg flex items-center justify-center cursor-pointer animate-pulse-glow-emerald" onClick={handleBoxClick}>
-            <p className="text-5xl font-bold text-white" style={{animation: 'ping 1s cubic-bezier(0, 0, 0.2, 1)'}}>CLICK!</p>
+          <div>
+            <p className="text-2xl font-bold mb-4">Too Soon!</p>
+            <StyledButton onClick={start}>Try Again</StyledButton>
           </div>
         );
       case 'result':
         return (
-          <div className="text-center animate-fade-in-up">
-             {isNewHighScore && (
-                <p className="text-3xl font-bold text-yellow-400 mb-4 animate-bounce">New High Score!</p>
-             )}
-             {score === -1 ? (
-                <h2 className="text-4xl font-bold text-red-500 mb-4">Too Soon!</h2>
-             ) : (
-                <h2 className="text-4xl font-bold mb-4">Your Time: <span className="text-cyan-400 animate-score-pop">{score}ms</span></h2>
-             )}
-            <p className="text-slate-400 mb-8">Best: {highScore}ms. Can you beat it?</p>
-            <StyledButton onClick={startGame}>Play Again</StyledButton>
+          <div>
+            <p className="text-3xl font-bold mb-4">
+              Your time: <span className="text-white animate-score-pop">{reactionTime}ms</span>
+            </p>
+            <StyledButton onClick={start}>Try Again</StyledButton>
           </div>
         );
     }
   };
 
+  const getBoxColor = () => {
+    switch (gameState) {
+      case 'waiting': return 'bg-red-500';
+      case 'ready': return 'bg-green-500 animate-pulse-glow-emerald';
+      case 'too-soon': return 'bg-yellow-500';
+      case 'result': return 'bg-cyan-500';
+      default: return 'bg-slate-700';
+    }
+  };
+
   return (
-    <div className="flex flex-col items-center justify-center p-4 w-full max-w-2xl mx-auto">
-      {renderContent()}
-      <div className="mt-12">
-        <button onClick={onBack} className="text-slate-400 hover:text-cyan-400 transition-colors">
-          &larr; Back to Menu
-        </button>
+    <div className="flex flex-col items-center p-4 w-full max-w-2xl mx-auto text-center animate-fade-in-up">
+      <h2 className="text-4xl font-bold mb-4">Reaction Time</h2>
+      <p className="text-slate-400 mb-6">When the red box turns green, click as fast as you can.</p>
+      {bestTime && <p className="text-lg mb-4">Best Time: <span className="font-bold text-yellow-400">{bestTime}ms</span></p>}
+
+      <div
+        className={`w-full h-64 rounded-lg flex items-center justify-center cursor-pointer transition-colors ${getBoxColor()}`}
+        onClick={handleClick}
+      >
+        <div className="text-white">{renderContent()}</div>
       </div>
+      
+      <button onClick={onBack} className="mt-12 text-slate-400 hover:text-cyan-400 transition-colors">
+        &larr; Back to Menu
+      </button>
     </div>
   );
 };

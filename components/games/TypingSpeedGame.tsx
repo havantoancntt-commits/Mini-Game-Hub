@@ -1,179 +1,143 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import StyledButton from '../StyledButton';
 import useLocalStorage from '../../hooks/useLocalStorage';
-import { playSuccessSound, playWinSound } from '../../utils/audio';
 
 interface TypingSpeedGameProps {
   onBack: () => void;
+  onNewHighScore: (gameName: string, score: number) => void;
 }
 
-const WORDS = [
-  "react", "javascript", "tailwind", "component", "state", "props", "hook", "effect", "virtual", "render",
-  "developer", "interface", "typescript", "module", "build", "package", "function", "variable", "const",
-  "array", "object", "class", "style", "design", "responsive", "mobile", "desktop", "application", "web",
-  "game", "hub", "mini", "addictive", "engaging", "world", "class", "player", "interface", "experience"
+const TEXT_SAMPLES = [
+  "The quick brown fox jumps over the lazy dog.",
+  "Never underestimate the power of a good book.",
+  "The journey of a thousand miles begins with a single step.",
+  "Technology has revolutionized the way we live and work.",
+  "The sun always shines brightest after the rain."
 ];
-const GAME_DURATION = 30; // seconds
 
-const generateWords = (count: number) => {
-  return Array.from({ length: count }, () => WORDS[Math.floor(Math.random() * WORDS.length)]);
-};
+const getRandomText = () => TEXT_SAMPLES[Math.floor(Math.random() * TEXT_SAMPLES.length)];
 
-const getRating = (wpm: number) => {
-  if (wpm < 20) return { title: "Typing Turtle", color: "text-slate-400" };
-  if (wpm < 40) return { title: "Keyboard Coder", color: "text-cyan-400" };
-  if (wpm < 60) return { title: "Swift Scripter", color: "text-emerald-400" };
-  if (wpm < 80) return { title: "Typing Titan", color: "text-amber-400" };
-  return { title: "Word Weaver Wizard", color: "text-fuchsia-500" };
-};
-
-const TypingSpeedGame: React.FC<TypingSpeedGameProps> = ({ onBack }) => {
-  const [words, setWords] = useState<string[]>([]);
-  const [currentWordIndex, setCurrentWordIndex] = useState(0);
+const TypingSpeedGame: React.FC<TypingSpeedGameProps> = ({ onBack, onNewHighScore }) => {
+  const [text, setText] = useState(getRandomText());
   const [inputValue, setInputValue] = useState('');
-  const [timeLeft, setTimeLeft] = useState(GAME_DURATION);
-  const [isTyping, setIsTyping] = useState(false);
-  const [correctWords, setCorrectWords] = useState(0);
-  const [totalChars, setTotalChars] = useState(0);
+  const [startTime, setStartTime] = useState<number | null>(null);
+  const [wpm, setWpm] = useState(0);
+  const [accuracy, setAccuracy] = useState(100);
   const [isFinished, setIsFinished] = useState(false);
-  const [highScore, setHighScore] = useLocalStorage('typing-speed-hs', 0);
-  const [isNewHighScore, setIsNewHighScore] = useState(false);
-
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-
-  const wpm = totalChars > 0 && (GAME_DURATION - timeLeft > 0) ? Math.round((totalChars / 5) / ((GAME_DURATION - timeLeft) / 60)) : 0;
-
-  const resetGame = useCallback(() => {
-    setWords(generateWords(100));
-    setCurrentWordIndex(0);
-    setInputValue('');
-    setTimeLeft(GAME_DURATION);
-    setIsTyping(false);
-    setCorrectWords(0);
-    setTotalChars(0);
-    setIsFinished(false);
-    setIsNewHighScore(false);
-    if (timerRef.current) clearInterval(timerRef.current);
-    setTimeout(() => inputRef.current?.focus(), 0);
-  }, []);
+  const [highScore, setHighScore] = useLocalStorage<number>('typing-speed-highscore', 0);
 
   useEffect(() => {
-    resetGame();
-  }, [resetGame]);
-
-  useEffect(() => {
-    if (isTyping && timeLeft > 0) {
-      timerRef.current = setInterval(() => {
-        setTimeLeft(prev => prev - 1);
-      }, 1000);
-    } else if (timeLeft === 0 && !isFinished) {
-      if (timerRef.current) clearInterval(timerRef.current);
-      playWinSound();
-      setIsTyping(false);
-      setIsFinished(true);
-      const finalWpm = totalChars > 0 ? Math.round((totalChars / 5) / (GAME_DURATION / 60)) : 0;
-      if (finalWpm > highScore) {
-        setHighScore(finalWpm);
-        setIsNewHighScore(true);
-      }
+    if (!isFinished) {
+      inputRef.current?.focus();
     }
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, [isTyping, timeLeft, isFinished, totalChars, highScore, setHighScore]);
+  }, [isFinished]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (isFinished) return;
-    const value = e.target.value;
 
-    if (!isTyping && value.trim().length > 0) {
-      setIsTyping(true);
+    const currentVal = e.target.value;
+    
+    if (!startTime) {
+      setStartTime(Date.now());
     }
 
-    if (value.endsWith(' ')) {
-      const typedWord = value.trim();
-      if (typedWord === words[currentWordIndex]) {
-        playSuccessSound();
-        setCorrectWords(prev => prev + 1);
-        setTotalChars(prev => prev + typedWord.length);
+    setInputValue(currentVal);
+
+    if (currentVal.length >= text.length) {
+      finishGame(currentVal);
+    }
+  };
+
+  const finishGame = (finalValue: string) => {
+    if (!startTime) return;
+    const endTime = Date.now();
+    const durationInMinutes = (endTime - startTime) / 1000 / 60;
+    const wordsTyped = text.split(' ').length;
+    const calculatedWpm = durationInMinutes > 0 ? Math.round(wordsTyped / durationInMinutes) : 0;
+    setWpm(calculatedWpm);
+
+    let correctChars = 0;
+    const cleanText = text.substring(0, finalValue.length);
+    for (let i = 0; i < cleanText.length; i++) {
+      if (cleanText[i] === finalValue[i]) {
+        correctChars++;
       }
-      setCurrentWordIndex(prev => prev + 1);
-      setInputValue('');
-    } else {
-      setInputValue(value);
+    }
+    const calculatedAccuracy = Math.round((correctChars / cleanText.length) * 100);
+    setAccuracy(calculatedAccuracy);
+    setIsFinished(true);
+    
+    if (calculatedWpm > highScore) {
+      setHighScore(calculatedWpm);
+      onNewHighScore('Typing Speed', calculatedWpm);
     }
   };
 
-  const getWordClass = (index: number) => {
-    if (index < currentWordIndex) return 'text-slate-500';
-    if (index === currentWordIndex) {
-      const isCorrect = words[index].startsWith(inputValue);
-      return `font-bold rounded p-1 ${isCorrect ? 'text-cyan-400' : 'text-red-500 bg-red-500/20'}`;
-    }
-    return 'text-slate-300';
+  const resetGame = () => {
+    setText(getRandomText());
+    setInputValue('');
+    setStartTime(null);
+    setWpm(0);
+    setAccuracy(100);
+    setIsFinished(false);
   };
-  
-  if (isFinished) {
-      const finalWpm = totalChars > 0 ? Math.round((totalChars / 5) / (GAME_DURATION / 60)) : 0;
-      const rating = getRating(finalWpm);
-      return (
-          <div className="text-center flex flex-col items-center animate-fade-in-up">
-              <h2 className="text-4xl font-bold mb-4">Time's Up!</h2>
-              {isNewHighScore && <p className="text-2xl font-bold text-yellow-400 mb-4 animate-bounce">New High Score!</p>}
-              <div className="text-2xl text-slate-300 mb-2">Your score:</div>
-              <div className="text-6xl font-extrabold text-cyan-400 mb-4">{finalWpm} WPM</div>
-              <div className={`text-3xl font-bold mb-8 ${rating.color}`}>{rating.title}</div>
-              <p className="text-slate-400 mb-8">You typed {correctWords} words correctly. Best: {highScore} WPM.</p>
-              <StyledButton onClick={resetGame}>Play Again</StyledButton>
-              <div className="mt-12">
-                  <button onClick={onBack} className="text-slate-400 hover:text-cyan-400 transition-colors">
-                    &larr; Back to Menu
-                  </button>
-              </div>
-          </div>
-      );
-  }
+
+  const renderText = () => {
+    return text.split('').map((char, index) => {
+      let colorClass = 'text-slate-500';
+      if (index < inputValue.length) {
+        colorClass = char === inputValue[index] ? 'text-green-400' : 'text-red-500 underline';
+      }
+      return <span key={index} className={colorClass}>{char}</span>;
+    });
+  };
 
   return (
-    <div className="flex flex-col items-center w-full">
-      <div className="w-full max-w-3xl bg-slate-800 rounded-lg p-4 mb-6">
-        <div className="flex justify-between items-center text-xl font-bold">
-          <div className={`text-slate-300 transition-colors ${timeLeft <= 5 ? 'text-red-500 animate-pulse' : ''}`}>
-            Time: <span className="text-white">{timeLeft}s</span>
-          </div>
-          <div className="text-slate-300">WPM: <span className="text-white">{wpm}</span></div>
-        </div>
-      </div>
+    <div className="flex flex-col items-center p-4 w-full max-w-3xl mx-auto text-center animate-fade-in-up">
+      <h2 className="text-4xl font-bold mb-4">Typing Speed Test</h2>
+      <p className="text-slate-400 mb-8">Type the text below as fast and accurately as you can.</p>
 
-      <div className="w-full max-w-3xl bg-slate-800 rounded-lg p-6 text-2xl leading-relaxed tracking-wider font-mono h-48 overflow-hidden" onClick={() => inputRef.current?.focus()}>
-        <div className="flex flex-wrap gap-x-3 gap-y-4">
-            {words.slice(currentWordIndex).slice(0, 30).map((word, index) => (
-              <span key={index} className={getWordClass(currentWordIndex + index)}>
-                {word}
-              </span>
-            ))}
-        </div>
+      <div className="w-full p-6 bg-slate-800 rounded-lg text-2xl tracking-wider font-mono mb-6 border border-slate-700">
+        <p>{renderText()}</p>
       </div>
 
       <input
         ref={inputRef}
         type="text"
         value={inputValue}
-        onChange={handleChange}
-        className="mt-6 w-full max-w-3xl p-4 bg-slate-700 text-white text-2xl rounded-lg border-2 border-slate-600 focus:border-cyan-400 focus:ring-0 focus:outline-none transition-colors"
-        placeholder={!isTyping ? "Start typing here..." : ""}
+        onChange={handleInputChange}
+        className="w-full p-4 bg-slate-700 text-white rounded-md text-xl focus:outline-none focus:ring-2 focus:ring-cyan-500"
+        placeholder={isFinished ? 'Game Over!' : 'Start typing here...'}
+        disabled={isFinished}
         autoFocus
-        autoComplete="off"
-        autoCorrect="off"
-        autoCapitalize="off"
-        spellCheck="false"
       />
-      <div className="mt-12">
-         <button onClick={onBack} className="text-slate-400 hover:text-cyan-400 transition-colors">
-           &larr; Back to Menu
-         </button>
-      </div>
+      
+      {isFinished ? (
+        <div className="mt-8 text-center animate-fade-in">
+          <h3 className="text-3xl font-bold text-cyan-400 mb-4">Results</h3>
+          <div className="flex justify-center gap-8 text-white">
+            <div>
+              <p className="text-4xl font-bold animate-score-pop">{wpm}</p>
+              <p className="text-slate-400">WPM</p>
+            </div>
+            <div>
+              <p className="text-4xl font-bold animate-score-pop">{accuracy}%</p>
+              <p className="text-slate-400">Accuracy</p>
+            </div>
+          </div>
+           <p className="mt-4 text-lg">High Score: <span className="font-bold text-yellow-400">{highScore}</span> WPM</p>
+          <StyledButton onClick={resetGame} className="mt-6">
+            Try Again
+          </StyledButton>
+        </div>
+      ) : (
+         <p className="mt-4 text-lg">High Score: <span className="font-bold text-yellow-400">{highScore}</span> WPM</p>
+      )}
+
+      <button onClick={onBack} className="mt-12 text-slate-400 hover:text-cyan-400 transition-colors">
+        &larr; Back to Menu
+      </button>
     </div>
   );
 };

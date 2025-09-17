@@ -1,130 +1,156 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import StyledButton from '../StyledButton';
 import useLocalStorage from '../../hooks/useLocalStorage';
-import { playSimonSound, playErrorSound, playWinSound } from '../../utils/audio';
+import { playSimonSound, playGameOverSound } from '../../utils/audio';
 
 interface SimonSaysGameProps {
   onBack: () => void;
+  onNewHighScore: (gameName: string, score: number) => void;
 }
 
 const COLORS = ['green', 'red', 'yellow', 'blue'];
-const COLOR_CLASSES = {
-  green: 'bg-green-500',
-  red: 'bg-red-500',
-  yellow: 'bg-yellow-400',
-  blue: 'bg-blue-500',
-};
-const ACTIVE_COLOR_CLASSES = {
-  green: 'bg-green-300 scale-105 shadow-[0_0_25px_theme(colors.green.400)]',
-  red: 'bg-red-300 scale-105 shadow-[0_0_25px_theme(colors.red.400)]',
-  yellow: 'bg-yellow-200 scale-105 shadow-[0_0_25px_theme(colors.yellow.300)]',
-  blue: 'bg-blue-300 scale-105 shadow-[0_0_25px_theme(colors.blue.400)]',
-};
+const DELAY = 800; // ms
 
-const SimonSaysGame: React.FC<SimonSaysGameProps> = ({ onBack }) => {
+const SimonSaysGame: React.FC<SimonSaysGameProps> = ({ onBack, onNewHighScore }) => {
   const [sequence, setSequence] = useState<string[]>([]);
   const [playerSequence, setPlayerSequence] = useState<string[]>([]);
   const [activeColor, setActiveColor] = useState<string | null>(null);
+  const [gameState, setGameState] = useState<'idle' | 'showing' | 'playing' | 'over'>('idle');
   const [level, setLevel] = useState(0);
-  const [gameState, setGameState] = useState<'start' | 'computer' | 'player' | 'over'>('start');
-  const [highScore, setHighScore] = useLocalStorage('simon-says-hs', 0);
+  const [highScore, setHighScore] = useLocalStorage('simon-says-highscore', 0);
+  const levelKey = React.useMemo(() => Date.now(), [level]);
 
   const nextLevel = useCallback(() => {
-    const nextColor = COLORS[Math.floor(Math.random() * COLORS.length)];
-    setSequence(prev => [...prev, nextColor]);
-    setLevel(prev => prev + 1);
+    setGameState('showing');
     setPlayerSequence([]);
-    setGameState('computer');
-  }, []);
+    const nextColor = COLORS[Math.floor(Math.random() * COLORS.length)];
+    const newSequence = [...sequence, nextColor];
+    setSequence(newSequence);
+    setLevel(newSequence.length);
 
+    newSequence.forEach((color, index) => {
+      setTimeout(() => {
+        setActiveColor(color);
+        playSimonSound(color);
+        setTimeout(() => {
+          setActiveColor(null);
+          if (index === newSequence.length - 1) {
+            setGameState('playing');
+          }
+        }, DELAY / 2);
+      }, (index + 1) * DELAY);
+    });
+  }, [sequence]);
+  
   const startGame = () => {
     setSequence([]);
+    setPlayerSequence([]);
     setLevel(0);
-    setTimeout(nextLevel, 500);
+    setGameState('idle');
+    // nextLevel is called inside useEffect when sequence becomes empty
+    setTimeout(() => {
+        const nextColor = COLORS[Math.floor(Math.random() * COLORS.length)];
+        setSequence([nextColor]);
+    }, 500)
   };
-  
-  useEffect(() => {
-    if (gameState === 'computer' && sequence.length > 0) {
-      let i = 0;
-      const interval = setInterval(() => {
-        setActiveColor(sequence[i]);
-        playSimonSound(sequence[i]);
-        setTimeout(() => setActiveColor(null), 300);
-        i++;
-        if (i >= sequence.length) {
-          clearInterval(interval);
-          setGameState('player');
-        }
-      }, 600);
-    }
-  }, [gameState, sequence]);
-  
-  const handleColorClick = (color: string) => {
-    if (gameState !== 'player') return;
 
-    playSimonSound(color);
+  useEffect(() => {
+    if (sequence.length > 0 && gameState === 'idle') {
+        setLevel(1);
+        setGameState('showing');
+        setPlayerSequence([]);
+        
+        sequence.forEach((color, index) => {
+          setTimeout(() => {
+            setActiveColor(color);
+            playSimonSound(color);
+            setTimeout(() => {
+              setActiveColor(null);
+              if (index === sequence.length - 1) {
+                setGameState('playing');
+              }
+            }, DELAY / 2);
+          }, (index + 1) * DELAY);
+        });
+    }
+  }, [sequence, gameState]);
+
+  const handlePlayerClick = (color: string) => {
+    if (gameState !== 'playing') return;
+
     const newPlayerSequence = [...playerSequence, color];
     setPlayerSequence(newPlayerSequence);
+    playSimonSound(color);
 
     if (newPlayerSequence[newPlayerSequence.length - 1] !== sequence[newPlayerSequence.length - 1]) {
-      playErrorSound();
+      // Game Over
+      playGameOverSound();
       setGameState('over');
-      if (level -1 > highScore) {
-        setHighScore(level - 1);
+      if (level > highScore) {
+        setHighScore(level);
+        onNewHighScore('Simon Says', level);
       }
       return;
     }
 
     if (newPlayerSequence.length === sequence.length) {
-      playWinSound();
-      setTimeout(nextLevel, 1000);
+      setTimeout(() => nextLevel(), 1000);
     }
   };
 
-  const renderGameContent = () => {
-    if (gameState === 'start' || gameState === 'over') {
-      return (
-        <div className="text-center">
-          {gameState === 'over' && <h2 className="text-4xl font-bold text-red-500 mb-4">Game Over!</h2>}
-          <p className="text-2xl mb-4">
-            {gameState === 'start' ? 'Press Start to Play' : `You reached level ${level - 1}.`}
-          </p>
-          <p className="text-lg text-yellow-400 mb-8">High Score: {highScore}</p>
-          <StyledButton onClick={startGame}>Start Game</StyledButton>
-        </div>
-      );
-    }
-
-    return (
-        <div className="flex flex-col items-center">
-            <p className="text-2xl font-bold mb-4">Level: <span className="animate-score-pop" key={level}>{level}</span></p>
-            <p className="text-xl text-slate-400 mb-4 h-8">
-              {gameState === 'computer' ? 'Watch...' : 'Your Turn...'}
-            </p>
-            <div className="grid grid-cols-2 gap-4">
-                {COLORS.map(color => (
-                <div
-                    key={color}
-                    onClick={() => handleColorClick(color)}
-                    className={`w-32 h-32 sm:w-40 sm:h-40 rounded-full cursor-pointer transition-all duration-200
-                                ${COLOR_CLASSES[color as keyof typeof COLOR_CLASSES]}
-                                ${activeColor === color ? ACTIVE_COLOR_CLASSES[color as keyof typeof ACTIVE_COLOR_CLASSES] : ''}
-                                ${gameState === 'player' ? 'hover:opacity-80' : 'pointer-events-none'}`}
-                />
-                ))}
-            </div>
-        </div>
-    );
+  const colorClasses: { [key: string]: string } = {
+    green: 'bg-green-500 hover:bg-green-400 shadow-[0_0_20px_theme(colors.green.500/80%)]',
+    red: 'bg-red-500 hover:bg-red-400 shadow-[0_0_20px_theme(colors.red.500/80%)]',
+    yellow: 'bg-yellow-500 hover:bg-yellow-400 shadow-[0_0_20px_theme(colors.yellow.500/80%)]',
+    blue: 'bg-blue-500 hover:bg-blue-400 shadow-[0_0_20px_theme(colors.blue.500/80%)]',
   };
   
+  const activeColorClasses: { [key: string]: string } = {
+    green: 'bg-green-300 scale-105',
+    red: 'bg-red-300 scale-105',
+    yellow: 'bg-yellow-300 scale-105',
+    blue: 'bg-blue-300 scale-105',
+  }
+
   return (
-    <div className="flex flex-col items-center">
-        {renderGameContent()}
-        <div className="mt-12">
-            <button onClick={onBack} className="text-slate-400 hover:text-cyan-400 transition-colors">
-            &larr; Back to Menu
-            </button>
+    <div className="flex flex-col items-center p-4 w-full max-w-md mx-auto text-center animate-fade-in-up">
+      <h2 className="text-4xl font-bold mb-2">Simon Says</h2>
+      <p className="text-slate-400 mb-4">Repeat the sequence of colors.</p>
+       <div className="flex gap-8 mb-4">
+          <p>Level: <span key={levelKey} className="font-bold text-cyan-400 animate-score-pop">{level}</span></p>
+          <p>High Score: <span className="font-bold text-yellow-400">{highScore}</span></p>
+      </div>
+
+      <div className="relative w-96 h-96">
+        {gameState === 'idle' || gameState === 'over' ? (
+          <div className="absolute inset-0 bg-black bg-opacity-70 flex flex-col items-center justify-center z-10 rounded-full">
+            <h3 className="text-3xl font-bold text-white mb-4">{gameState === 'over' ? `Game Over! Level ${level}` : 'Ready?'}</h3>
+            <StyledButton onClick={startGame}>
+              {gameState === 'over' ? 'Play Again' : 'Start Game'}
+            </StyledButton>
+          </div>
+        ) : <p className="absolute inset-0 flex items-center justify-center text-2xl font-bold">{gameState === 'showing' ? 'Watch' : 'Repeat'}</p>}
+        
+        <div className="grid grid-cols-2 grid-rows-2 w-full h-full gap-2">
+            {COLORS.map((color) => (
+                <div
+                    key={color}
+                    onClick={() => handlePlayerClick(color)}
+                    className={`w-full h-full rounded-lg transition-all duration-200 cursor-pointer 
+                                ${colorClasses[color]} 
+                                ${activeColor === color ? activeColorClasses[color] : ''}
+                                ${color === 'green' ? 'rounded-tl-full' : ''}
+                                ${color === 'red' ? 'rounded-tr-full' : ''}
+                                ${color === 'yellow' ? 'rounded-bl-full' : ''}
+                                ${color === 'blue' ? 'rounded-br-full' : ''}`}
+                ></div>
+            ))}
         </div>
+      </div>
+
+      <button onClick={onBack} className="mt-12 text-slate-400 hover:text-cyan-400 transition-colors">
+        &larr; Back to Menu
+      </button>
     </div>
   );
 };

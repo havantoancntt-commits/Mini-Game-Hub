@@ -1,72 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta charset="UTF-T" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Mini Game Hub</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-      body {
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-        overscroll-behavior: none;
+      @keyframes fade-in {
+        from { opacity: 0; }
+        to { opacity: 1; }
       }
-      
-      @keyframes pop-in {
-        0% { transform: scale(0.5); opacity: 0; }
-        100% { transform: scale(1); opacity: 1; }
+      .animate-fade-in {
+        animation: fade-in 0.5s ease-out forwards;
       }
-      .animate-pop-in {
-        animation: pop-in 0.3s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
-      }
-
       @keyframes fade-in-up {
-        0% { opacity: 0; transform: translateY(20px); }
-        100% { opacity: 1; transform: translateY(0); }
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
       }
       .animate-fade-in-up {
-        animation: fade-in-up 0.5s ease-out both;
+        animation: fade-in-up 0.5s ease-out forwards;
       }
-
-      @keyframes pulse-glow-cyan {
-        0%, 100% {
-          filter: drop-shadow(0 0 10px #06b6d4);
-        }
-        50% {
-          filter: drop-shadow(0 0 20px #06b6d4);
-        }
+      @keyframes score-pop {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.25); }
+        100% { transform: scale(1); }
       }
-      .animate-pulse-glow-cyan {
-        animation: pulse-glow-cyan 1.5s infinite ease-in-out;
+      .animate-score-pop {
+        animation: score-pop 0.3s ease-out;
       }
-      
-      @keyframes pulse-glow-emerald {
-        0%, 100% {
-          box-shadow: 0 0 15px #34d399;
-          filter: drop-shadow(0 0 10px #34d399);
-        }
-        50% {
-          box-shadow: 0 0 30px #34d399;
-           filter: drop-shadow(0 0 20px #34d399);
-        }
-      }
-      .animate-pulse-glow-emerald {
-        animation: pulse-glow-emerald 1.5s infinite ease-in-out;
-      }
-
-      @keyframes pulse-glow-yellow {
-        0%, 100% {
-          filter: drop-shadow(0 0 10px #facc15); /* yellow-400 */
-        }
-        50% {
-          filter: drop-shadow(0 0 20px #facc15);
-        }
-      }
-      .animate-pulse-glow-yellow {
-        animation: pulse-glow-yellow 1.5s infinite ease-in-out;
-      }
-
       @keyframes gradient-wave {
         0% { background-position: 0% 50%; }
         50% { background-position: 100% 50%; }
@@ -74,38 +40,61 @@
       }
       .animate-gradient-wave {
         background-size: 200% 200%;
-        animation: gradient-wave 3s ease-in-out infinite;
+        animation: gradient-wave 5s ease infinite;
       }
-
-      @keyframes score-pop {
-        0% { transform: scale(1); }
-        50% { transform: scale(1.25); color: #22d3ee; } /* cyan-400 */
-        100% { transform: scale(1); }
-      }
-      .animate-score-pop {
-        display: inline-block;
-        animation: score-pop 0.3s ease-in-out;
-      }
-
       .text-3d-glow {
         text-shadow: 
-            1px 1px 2px #1e293b,  /* slate-800 */
-            0px 0px 10px theme(colors.cyan.500),
-            0px 0px 25px theme(colors.fuchsia.700);
+          0 0 5px theme('colors.cyan.400/50%'),
+          0 0 10px theme('colors.cyan.400/40%'),
+          0 0 20px theme('colors.fuchsia.500/30%'),
+          0 0 40px theme('colors.fuchsia.500/20%');
+      }
+       @keyframes pulse-glow-cyan {
+        0%, 100% { box-shadow: 0 0 20px theme('colors.cyan.500/30%'); }
+        50% { box-shadow: 0 0 40px theme('colors.cyan.500/70%'); }
+      }
+      .animate-pulse-glow-cyan {
+        animation: pulse-glow-cyan 2s infinite ease-in-out;
+      }
+      @keyframes pulse-glow-emerald {
+        0%, 100% { box-shadow: 0 0 25px theme('colors.emerald.500/40%'); }
+        50% { box-shadow: 0 0 50px theme('colors.emerald.500/80%'); }
+      }
+      .animate-pulse-glow-emerald {
+        animation: pulse-glow-emerald 1.5s infinite ease-in-out;
+      }
+       @keyframes pulse-glow-yellow {
+        0%, 100% { box-shadow: 0 0 25px theme('colors.yellow.400/40%'); }
+        50% { box-shadow: 0 0 50px theme('colors.yellow.400/80%'); }
+      }
+      .animate-pulse-glow-yellow {
+        animation: pulse-glow-yellow 2s infinite ease-in-out;
+      }
+      @keyframes pulse-glow-subtle {
+        0%, 100% {
+          box-shadow: 0 0 10px theme('colors.cyan.500/30%'), 0 0 12px theme('colors.fuchsia.500/20%');
+        }
+        50% {
+          box-shadow: 0 0 25px theme('colors.cyan.500/60%'), 0 0 30px theme('colors.fuchsia.500/40%');
+        }
+      }
+      .animate-pulse-glow-subtle {
+        animation: pulse-glow-subtle 3s infinite ease-in-out;
       }
     </style>
   <script type="importmap">
 {
   "imports": {
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.1.1/",
     "react/": "https://aistudiocdn.com/react@^19.1.1/",
     "react": "https://aistudiocdn.com/react@^19.1.1",
-    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.19.0"
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.20.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.1.1/"
   }
 }
 </script>
 </head>
-  <body class="bg-slate-900">
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>
   </body>

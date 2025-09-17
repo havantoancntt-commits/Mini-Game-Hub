@@ -1,165 +1,147 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import useInterval from '../../hooks/useInterval';
 import StyledButton from '../StyledButton';
 import useLocalStorage from '../../hooks/useLocalStorage';
-import { playErrorSound, playSuccessSound } from '../../utils/audio';
 
 interface SnakeGameProps {
   onBack: () => void;
+  onNewHighScore: (gameName: string, score: number) => void;
 }
 
 const GRID_SIZE = 20;
-const TILE_SIZE = 20;
-const INITIAL_SNAKE = [{ x: 10, y: 10 }];
-const INITIAL_FOOD = { x: 15, y: 15 };
-const INITIAL_DIRECTION = { x: 0, y: -1 }; // Up
+const TILE_SIZE = 20; // in pixels
 
-const SnakeGame: React.FC<SnakeGameProps> = ({ onBack }) => {
-  const [snake, setSnake] = useState(INITIAL_SNAKE);
-  const [food, setFood] = useState(INITIAL_FOOD);
-  const [direction, setDirection] = useState(INITIAL_DIRECTION);
+type Direction = 'UP' | 'DOWN' | 'LEFT' | 'RIGHT';
+type Position = { x: number; y: number };
+
+const getRandomPosition = (): Position => ({
+  x: Math.floor(Math.random() * GRID_SIZE),
+  y: Math.floor(Math.random() * GRID_SIZE),
+});
+
+const SnakeGame: React.FC<SnakeGameProps> = ({ onBack, onNewHighScore }) => {
+  const [snake, setSnake] = useState<Position[]>([{ x: 10, y: 10 }]);
+  const [food, setFood] = useState<Position>(getRandomPosition());
+  const [direction, setDirection] = useState<Direction>('RIGHT');
   const [speed, setSpeed] = useState<number | null>(200);
   const [isGameOver, setIsGameOver] = useState(false);
   const [score, setScore] = useState(0);
-  const [highScore, setHighScore] = useLocalStorage('snake-hs', 0);
+  const [highScore, setHighScore] = useLocalStorage('snake-highscore', 0);
+  const scoreKey = React.useMemo(() => Date.now(), [score]);
 
-  const resetGame = useCallback(() => {
-    setSnake(INITIAL_SNAKE);
-    setFood(INITIAL_FOOD);
-    setDirection(INITIAL_DIRECTION);
-    setSpeed(200);
-    setIsGameOver(false);
-    setScore(0);
-  }, []);
 
-  const generateFood = useCallback(() => {
-    let newFoodPosition;
-    do {
-      newFoodPosition = {
-        x: Math.floor(Math.random() * GRID_SIZE),
-        y: Math.floor(Math.random() * GRID_SIZE),
-      };
-    } while (snake.some(segment => segment.x === newFoodPosition.x && segment.y === newFoodPosition.y));
-    setFood(newFoodPosition);
-  }, [snake]);
-
-  const handleKeyDown = useCallback((e: KeyboardEvent) => {
-    e.preventDefault();
-    switch (e.key) {
-      case 'ArrowUp':
-        if (direction.y === 0) setDirection({ x: 0, y: -1 });
-        break;
-      case 'ArrowDown':
-        if (direction.y === 0) setDirection({ x: 0, y: 1 });
-        break;
-      case 'ArrowLeft':
-        if (direction.x === 0) setDirection({ x: -1, y: 0 });
-        break;
-      case 'ArrowRight':
-        if (direction.x === 0) setDirection({ x: 1, y: 0 });
-        break;
-    }
-  }, [direction]);
-  
   useEffect(() => {
-    window.addEventListener('keydown', handleKeyDown);
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
+    const handleKeyDown = (e: KeyboardEvent) => {
+      e.preventDefault();
+      switch (e.key) {
+        case 'ArrowUp': if (direction !== 'DOWN') setDirection('UP'); break;
+        case 'ArrowDown': if (direction !== 'UP') setDirection('DOWN'); break;
+        case 'ArrowLeft': if (direction !== 'RIGHT') setDirection('LEFT'); break;
+        case 'ArrowRight': if (direction !== 'LEFT') setDirection('RIGHT'); break;
+      }
     };
-  }, [handleKeyDown]);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [direction]);
+
+  const resetGame = () => {
+    setSnake([{ x: 10, y: 10 }]);
+    setFood(getRandomPosition());
+    setDirection('RIGHT');
+    setScore(0);
+    setIsGameOver(false);
+    setSpeed(200);
+  };
 
   const gameLoop = () => {
     const newSnake = [...snake];
     const head = { ...newSnake[0] };
-    head.x += direction.x;
-    head.y += direction.y;
+
+    switch (direction) {
+      case 'UP': head.y -= 1; break;
+      case 'DOWN': head.y += 1; break;
+      case 'LEFT': head.x -= 1; break;
+      case 'RIGHT': head.x += 1; break;
+    }
 
     // Wall collision
     if (head.x < 0 || head.x >= GRID_SIZE || head.y < 0 || head.y >= GRID_SIZE) {
-      setIsGameOver(true);
-      setSpeed(null);
-      playErrorSound();
+      endGame();
       return;
     }
-    
+
     // Self collision
-    for (let i = 1; i < newSnake.length; i++) {
-        if (head.x === newSnake[i].x && head.y === newSnake[i].y) {
-            setIsGameOver(true);
-            setSpeed(null);
-            playErrorSound();
-            return;
-        }
+    for (const segment of newSnake) {
+      if (head.x === segment.x && head.y === segment.y) {
+        endGame();
+        return;
+      }
     }
 
     newSnake.unshift(head);
 
     // Food collision
     if (head.x === food.x && head.y === food.y) {
-      playSuccessSound();
-      const newScore = score + 1;
-      setScore(newScore);
-      if (newScore > highScore) {
-        setHighScore(newScore);
-      }
-      setSpeed(prev => (prev ? Math.max(50, prev * 0.95) : 50));
-      generateFood();
+      setScore(s => s + 1);
+      // Ensure new food doesn't spawn on the snake
+      let newFoodPosition;
+      do {
+        newFoodPosition = getRandomPosition();
+      } while (newSnake.some(seg => seg.x === newFoodPosition.x && seg.y === newFoodPosition.y));
+      setFood(newFoodPosition);
     } else {
       newSnake.pop();
     }
 
     setSnake(newSnake);
   };
+  
+  const endGame = () => {
+      setIsGameOver(true);
+      setSpeed(null);
+      if (score > highScore) {
+          setHighScore(score);
+          onNewHighScore('Classic Snake', score);
+      }
+  }
 
   useInterval(gameLoop, speed);
 
   return (
-    <div className="flex flex-col items-center">
-      <div className="mb-4 flex justify-between w-full max-w-sm text-xl font-bold text-slate-300">
-        <div>Score: <span className="text-white animate-score-pop" key={score}>{score}</span></div>
-        <div>Best: <span className="text-yellow-400">{highScore}</span></div>
+    <div className="flex flex-col items-center p-4 w-full max-w-md mx-auto text-center animate-fade-in-up">
+      <h2 className="text-4xl font-bold mb-2">Classic Snake</h2>
+      <p className="text-slate-400 mb-4">Use arrow keys to move the snake.</p>
+      <div className="flex gap-8 mb-4">
+          <p>Score: <span key={scoreKey} className="font-bold text-cyan-400 animate-score-pop">{score}</span></p>
+          <p>High Score: <span className="font-bold text-yellow-400">{highScore}</span></p>
       </div>
+
       <div
-        className="bg-slate-800 border-2 border-slate-700 relative"
+        className="bg-slate-800 border-2 border-slate-600 relative"
         style={{ width: GRID_SIZE * TILE_SIZE, height: GRID_SIZE * TILE_SIZE }}
       >
         {isGameOver && (
-          <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center text-center z-10 animate-fade-in">
-            <h2 className="text-4xl font-extrabold text-red-500 mb-4">Game Over</h2>
-            <p className="text-xl mb-6">Your score: {score}</p>
+          <div className="absolute inset-0 bg-black bg-opacity-70 flex flex-col items-center justify-center z-10">
+            <h3 className="text-3xl font-bold text-red-500 mb-4">Game Over</h3>
             <StyledButton onClick={resetGame}>Play Again</StyledButton>
           </div>
         )}
         {snake.map((segment, index) => (
           <div
             key={index}
-            className={`absolute ${index === 0 ? 'bg-cyan-400 drop-shadow-[0_0_6px_theme(colors.cyan.300)]' : 'bg-cyan-600'} rounded-sm`}
-            style={{
-              left: segment.x * TILE_SIZE,
-              top: segment.y * TILE_SIZE,
-              width: TILE_SIZE,
-              height: TILE_SIZE,
-            }}
+            className={`absolute ${index === 0 ? 'bg-green-400 shadow-[0_0_10px_theme(colors.green.400)]' : 'bg-green-600'}`}
+            style={{ left: segment.x * TILE_SIZE, top: segment.y * TILE_SIZE, width: TILE_SIZE, height: TILE_SIZE }}
           />
         ))}
         <div
-          className="absolute bg-fuchsia-500 rounded-full drop-shadow-[0_0_8px_theme(colors.fuchsia.400)]"
-          style={{
-            left: food.x * TILE_SIZE,
-            top: food.y * TILE_SIZE,
-            width: TILE_SIZE,
-            height: TILE_SIZE,
-          }}
+          className="absolute bg-red-500 rounded-full shadow-[0_0_10px_theme(colors.red.500)]"
+          style={{ left: food.x * TILE_SIZE, top: food.y * TILE_SIZE, width: TILE_SIZE, height: TILE_SIZE }}
         />
       </div>
-      <div className="mt-8 text-center text-slate-400">
-        <p>Use Arrow Keys to move</p>
-      </div>
-      <div className="mt-8">
-        <button onClick={onBack} className="text-slate-400 hover:text-cyan-400 transition-colors">
-          &larr; Back to Menu
-        </button>
-      </div>
+
+      <button onClick={onBack} className="mt-12 text-slate-400 hover:text-cyan-400 transition-colors">
+        &larr; Back to Menu
+      </button>
     </div>
   );
 };
