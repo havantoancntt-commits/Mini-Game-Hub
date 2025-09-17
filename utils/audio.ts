@@ -58,3 +58,19 @@ export const playWinSound = () => {
   setTimeout(() => playSound('sine', 783.99, 0.1), 240); // G5
   setTimeout(() => playSound('sine', 1046.50, 0.2), 360); // C6
 };
+export const playJumpSound = () => playSound('triangle', 1000, 0.05, 0.05);
+export const playGameOverSound = () => {
+  playSound('square', 300, 0.2);
+  setTimeout(() => playSound('square', 200, 0.3), 150);
+};
+export const playSimonSound = (color: string) => {
+    const frequencies: { [key: string]: number } = {
+        green: 392.00,   // G4
+        red: 493.88,   // B4
+        yellow: 587.33,  // D5
+        blue: 783.99,   // G5
+    };
+    if (frequencies[color]) {
+        playSound('sine', frequencies[color], 0.3, 0.1);
+    }
+};

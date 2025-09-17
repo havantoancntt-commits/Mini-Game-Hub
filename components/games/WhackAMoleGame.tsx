@@ -80,7 +80,7 @@ const WhackAMoleGame: React.FC<WhackAMoleGameProps> = ({ onBack }) => {
     return (
       <div className="w-full max-w-md">
         <div className="flex justify-between items-center text-xl font-bold mb-6">
-          <div>Score: <span className="text-white">{score}</span></div>
+          <div>Score: <span className="text-white animate-score-pop" key={score}>{score}</span></div>
           <div className={`transition-colors ${timeLeft <= 5 ? 'text-red-500 animate-pulse' : ''}`}>
             Time: <span className="text-white">{timeLeft}s</span>
           </div>

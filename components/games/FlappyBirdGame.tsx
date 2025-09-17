@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import useInterval from '../../hooks/useInterval';
 import StyledButton from '../StyledButton';
 import useLocalStorage from '../../hooks/useLocalStorage';
-import { playErrorSound, playSuccessSound } from '../../utils/audio';
+import { playErrorSound, playSuccessSound, playJumpSound } from '../../utils/audio';
 
 interface FlappyBirdGameProps {
     onBack: () => void;
@@ -34,14 +34,15 @@ const FlappyBirdGame: React.FC<FlappyBirdGameProps> = ({ onBack }) => {
     };
     
     useEffect(() => {
-        const handleKeyPress = (e: KeyboardEvent) => {
-            if (e.code === 'Space' || e.type === 'click' || e.type === 'touchstart') {
-                e.preventDefault();
-                if (gameState === 'playing') {
-                    setBirdVelocity(-JUMP_STRENGTH);
-                } else if (gameState === 'start' || gameState === 'over') {
-                    resetGame();
-                }
+        const handleKeyPress = (e: KeyboardEvent | MouseEvent | TouchEvent) => {
+            if ('code' in e && e.code !== 'Space') return;
+            
+            e.preventDefault();
+            if (gameState === 'playing') {
+                playJumpSound();
+                setBirdVelocity(-JUMP_STRENGTH);
+            } else if (gameState === 'start' || gameState === 'over') {
+                resetGame();
             }
         };
         
@@ -86,11 +87,18 @@ const FlappyBirdGame: React.FC<FlappyBirdGameProps> = ({ onBack }) => {
         }
         
         // Remove old pipes and check for score
+        let scoredThisFrame = false;
         const updatedPipes = newPipes.filter(pipe => {
             if (pipe.x + PIPE_WIDTH < 0) return false;
-            if (pipe.x + PIPE_WIDTH < GAME_WIDTH / 2 - BIRD_SIZE / 2 && pipe.x + PIPE_WIDTH > GAME_WIDTH / 2 - BIRD_SIZE/2 - PIPE_SPEED ) {
-                setScore(s => s + 1);
-                playSuccessSound();
+            // Check if bird just passed the pipe
+            const pipeRightEdge = pipe.x + PIPE_WIDTH;
+            const birdLeftEdge = GAME_WIDTH / 2 - BIRD_SIZE / 2;
+            if (pipeRightEdge < birdLeftEdge && pipeRightEdge > birdLeftEdge - PIPE_SPEED) {
+                if (!scoredThisFrame) {
+                    setScore(s => s + 1);
+                    playSuccessSound();
+                    scoredThisFrame = true; 
+                }
             }
             return true;
         });
@@ -125,7 +133,7 @@ const FlappyBirdGame: React.FC<FlappyBirdGameProps> = ({ onBack }) => {
     return (
         <div className="flex flex-col items-center">
             <div className="mb-4 flex justify-between w-full max-w-lg text-xl font-bold text-slate-300">
-                <div>Score: <span className="text-white">{score}</span></div>
+                <div>Score: <span className="text-white animate-score-pop" key={score}>{score}</span></div>
                 <div>Best: <span className="text-yellow-400">{highScore}</span></div>
             </div>
             <div className="bg-cyan-900 overflow-hidden relative border-2 border-slate-700" style={{ width: GAME_WIDTH, height: GAME_HEIGHT }}>
@@ -143,7 +151,7 @@ const FlappyBirdGame: React.FC<FlappyBirdGameProps> = ({ onBack }) => {
                     </div>
                 )}
                 
-                <div className="absolute bg-yellow-400 rounded-full" style={{
+                <div className="absolute bg-yellow-400 rounded-full shadow-[0_0_10px_theme(colors.yellow.300)]" style={{
                     width: BIRD_SIZE,
                     height: BIRD_SIZE,
                     left: GAME_WIDTH / 2 - BIRD_SIZE / 2,
@@ -153,14 +161,14 @@ const FlappyBirdGame: React.FC<FlappyBirdGameProps> = ({ onBack }) => {
 
                 {pipes.map((pipe, index) => (
                     <div key={index}>
-                        <div className="absolute bg-emerald-500" style={{
+                        <div className="absolute bg-emerald-500 shadow-[0_0_15px_theme(colors.emerald.600)]" style={{
                             left: pipe.x,
                             top: 0,
                             width: PIPE_WIDTH,
                             height: pipe.topHeight,
                             border: '2px solid #10B981'
                         }}></div>
-                        <div className="absolute bg-emerald-500" style={{
+                        <div className="absolute bg-emerald-500 shadow-[0_0_15px_theme(colors.emerald.600)]" style={{
                             left: pipe.x,
                             top: pipe.topHeight + PIPE_GAP,
                             width: PIPE_WIDTH,

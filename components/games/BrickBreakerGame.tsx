@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect, useRef } from 'react';
 import useInterval from '../../hooks/useInterval';
 import StyledButton from '../StyledButton';
@@ -165,14 +166,14 @@ const BrickBreakerGame: React.FC<BrickBreakerGameProps> = ({ onBack }) => {
   return (
     <div className="flex flex-col items-center">
       <div className="mb-4 flex justify-between w-full max-w-lg text-xl font-bold text-slate-300">
-        <div>Score: <span className="text-white">{score}</span></div>
+        <div>Score: <span className="text-white animate-score-pop" key={score}>{score}</span></div>
         <div>Lives: <span className="text-white">{lives}</span></div>
         <div>Best: <span className="text-yellow-400">{highScore}</span></div>
       </div>
       <div ref={gameAreaRef} className="bg-slate-900 overflow-hidden relative border-2 border-slate-700" style={{ width: GAME_WIDTH, height: GAME_HEIGHT, cursor: 'none' }}>
         {renderMessage()}
 
-        <div className="absolute bg-cyan-400" style={{
+        <div className="absolute bg-cyan-400 shadow-[0_0_10px_theme(colors.cyan.400)]" style={{
             left: paddleX,
             bottom: 10,
             width: PADDLE_WIDTH,
@@ -180,7 +181,7 @@ const BrickBreakerGame: React.FC<BrickBreakerGameProps> = ({ onBack }) => {
             borderRadius: '5px'
         }} />
 
-        <div className="absolute bg-fuchsia-400 rounded-full" style={{
+        <div className="absolute bg-fuchsia-400 rounded-full shadow-[0_0_10px_theme(colors.fuchsia.400)]" style={{
             left: ball.x - BALL_RADIUS,
             top: ball.y - BALL_RADIUS,
             width: BALL_RADIUS * 2,

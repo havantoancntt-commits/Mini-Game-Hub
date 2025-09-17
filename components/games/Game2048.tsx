@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import StyledButton from '../StyledButton';
 import useLocalStorage from '../../hooks/useLocalStorage';
-import { playSuccessSound, playWinSound } from '../../utils/audio';
+import { playSuccessSound, playWinSound, playGameOverSound } from '../../utils/audio';
 
 interface Game2048Props {
   onBack: () => void;
@@ -23,17 +23,33 @@ const Game2048: React.FC<Game2048Props> = ({ onBack }) => {
 
   const addNumber = useCallback((grid: Grid): Grid => {
     const newGrid = grid.map(row => [...row]);
-    let added = false;
-    while (!added) {
-      const row = Math.floor(Math.random() * GRID_SIZE);
-      const col = Math.floor(Math.random() * GRID_SIZE);
-      if (newGrid[row][col] === 0) {
-        newGrid[row][col] = Math.random() > 0.9 ? 4 : 2;
-        added = true;
-      }
+    const emptyCells: {r: number, c: number}[] = [];
+    for(let r = 0; r < GRID_SIZE; r++) {
+        for(let c = 0; c < GRID_SIZE; c++) {
+            if(newGrid[r][c] === 0) {
+                emptyCells.push({r, c});
+            }
+        }
     }
+    
+    if (emptyCells.length > 0) {
+        const {r, c} = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+        newGrid[r][c] = Math.random() > 0.9 ? 4 : 2;
+    }
+
     return newGrid;
   }, []);
+
+  const checkGameOver = (currentGrid: Grid): boolean => {
+    for (let r = 0; r < GRID_SIZE; r++) {
+        for (let c = 0; c < GRID_SIZE; c++) {
+            if (currentGrid[r][c] === 0) return false;
+            if (r < GRID_SIZE - 1 && currentGrid[r][c] === currentGrid[r + 1][c]) return false;
+            if (c < GRID_SIZE - 1 && currentGrid[r][c] === currentGrid[r][c + 1]) return false;
+        }
+    }
+    return true;
+  };
 
   const resetGame = useCallback(() => {
     let newGrid = createEmptyGrid();
@@ -68,7 +84,7 @@ const Game2048: React.FC<Game2048Props> = ({ onBack }) => {
           row[i] *= 2;
           newScore += row[i];
           row[i + 1] = 0;
-          moved = true;
+          moved = true; // This should be inside combine to detect merges
           playSuccessSound();
         }
       }
@@ -84,15 +100,7 @@ const Game2048: React.FC<Game2048Props> = ({ onBack }) => {
         }
         return result;
     };
-
-    const operate = (grid: Grid) => {
-      return grid.map(row => {
-        const newRow = slide(row);
-        combine(newRow);
-        return slide(newRow);
-      });
-    };
-
+    
     const isChanged = (original: Grid, newGrid: Grid) => {
       for (let r = 0; r < GRID_SIZE; r++) {
         for (let c = 0; c < GRID_SIZE; c++) {
@@ -102,6 +110,19 @@ const Game2048: React.FC<Game2048Props> = ({ onBack }) => {
       return false;
     };
 
+    const operate = (grid: Grid) => {
+        return grid.map(row => {
+            const originalRow = [...row];
+            let newRow = slide(row);
+            newRow = combine(newRow);
+            newRow = slide(newRow);
+            if (!moved) {
+                moved = originalRow.join(',') !== newRow.join(',');
+            }
+            return newRow;
+        });
+    };
+
     if (direction === 'left') {
         tempGrid = operate(tempGrid);
     } else if (direction === 'right') {
@@ -109,30 +130,32 @@ const Game2048: React.FC<Game2048Props> = ({ onBack }) => {
         tempGrid = operate(tempGrid);
         tempGrid = tempGrid.map(row => row.reverse());
     } else if (direction === 'up') {
-        tempGrid = rotateRight(tempGrid);
-        tempGrid = rotateRight(tempGrid);
-        tempGrid = rotateRight(tempGrid);
+        tempGrid = rotateRight(rotateRight(rotateRight(tempGrid)));
         tempGrid = operate(tempGrid);
         tempGrid = rotateRight(tempGrid);
     } else if (direction === 'down') {
         tempGrid = rotateRight(tempGrid);
         tempGrid = operate(tempGrid);
-        tempGrid = rotateRight(tempGrid);
-        tempGrid = rotateRight(tempGrid);
-        tempGrid = rotateRight(tempGrid);
+        tempGrid = rotateRight(rotateRight(rotateRight(tempGrid)));
     }
 
-    if (isChanged(grid, tempGrid)) {
-      setGrid(addNumber(tempGrid));
+    if (moved) {
+      const newGridWithNumber = addNumber(tempGrid);
+      setGrid(newGridWithNumber);
       setScore(newScore);
       if(newScore > highScore) {
         setHighScore(newScore);
+      }
+      if (checkGameOver(newGridWithNumber)) {
+          setIsGameOver(true);
+          playGameOverSound();
       }
     }
   }, [grid, isGameOver, score, highScore, setHighScore, addNumber]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      e.preventDefault();
       switch (e.key) {
         case 'ArrowUp': move('up'); break;
         case 'ArrowDown': move('down'); break;
@@ -145,18 +168,19 @@ const Game2048: React.FC<Game2048Props> = ({ onBack }) => {
   }, [move]);
 
   const getTileColor = (value: number) => {
+    const baseStyle = 'shadow-[inset_0_2px_4px_rgba(0,0,0,0.3)] ';
     switch (value) {
-      case 2: return 'bg-slate-700';
-      case 4: return 'bg-slate-600';
-      case 8: return 'bg-cyan-800 text-slate-100';
-      case 16: return 'bg-cyan-700 text-slate-100';
-      case 32: return 'bg-cyan-600 text-slate-100';
-      case 64: return 'bg-cyan-500 text-slate-100';
-      case 128: return 'bg-fuchsia-800 text-slate-100';
-      case 256: return 'bg-fuchsia-700 text-slate-100';
-      case 512: return 'bg-fuchsia-600 text-slate-100';
-      case 1024: return 'bg-yellow-500 text-slate-900';
-      case 2048: return 'bg-yellow-400 text-slate-900 animate-pulse-glow';
+      case 2: return baseStyle + 'bg-slate-700';
+      case 4: return baseStyle + 'bg-slate-600';
+      case 8: return baseStyle + 'bg-cyan-800 text-slate-100';
+      case 16: return baseStyle + 'bg-cyan-700 text-slate-100';
+      case 32: return baseStyle + 'bg-cyan-600 text-slate-100';
+      case 64: return baseStyle + 'bg-cyan-500 text-slate-100';
+      case 128: return baseStyle + 'bg-fuchsia-800 text-slate-100';
+      case 256: return baseStyle + 'bg-fuchsia-700 text-slate-100';
+      case 512: return baseStyle + 'bg-fuchsia-600 text-slate-100';
+      case 1024: return baseStyle + 'bg-yellow-500 text-slate-900';
+      case 2048: return baseStyle + 'bg-yellow-400 text-slate-900 animate-pulse-glow-yellow';
       default: return 'bg-slate-800';
     }
   };
@@ -164,7 +188,7 @@ const Game2048: React.FC<Game2048Props> = ({ onBack }) => {
   return (
     <div className="flex flex-col items-center">
       <div className="mb-4 flex justify-between w-full max-w-sm text-xl font-bold text-slate-300">
-        <div>Score: <span className="text-white">{score}</span></div>
+        <div>Score: <span className="text-white animate-score-pop" key={score}>{score}</span></div>
         <div>Best: <span className="text-yellow-400">{highScore}</span></div>
       </div>
       <div className="bg-slate-700 p-2 rounded-lg relative">

@@ -13,7 +13,7 @@ const GameCard: React.FC<GameCardProps> = ({ title, description, icon, onSelect 
     <div 
       className="bg-slate-800/50 rounded-xl p-6 flex flex-col items-center text-center cursor-pointer
                  border border-slate-700 hover:border-cyan-400 transition-all duration-300 
-                 transform hover:scale-105 hover:shadow-2xl hover:shadow-cyan-500/20"
+                 transform hover:scale-105 hover:shadow-[0_0_25px_theme(colors.cyan.500/40%)]"
       onClick={onSelect}
     >
       <div className="text-cyan-400 mb-4">

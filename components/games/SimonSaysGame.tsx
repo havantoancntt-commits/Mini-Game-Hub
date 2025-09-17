@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import StyledButton from '../StyledButton';
 import useLocalStorage from '../../hooks/useLocalStorage';
-import { playErrorSound, playWinSound } from '../../utils/audio';
+import { playSimonSound, playErrorSound, playWinSound } from '../../utils/audio';
 
 interface SimonSaysGameProps {
   onBack: () => void;
@@ -15,10 +15,10 @@ const COLOR_CLASSES = {
   blue: 'bg-blue-500',
 };
 const ACTIVE_COLOR_CLASSES = {
-  green: 'bg-green-300 scale-105',
-  red: 'bg-red-300 scale-105',
-  yellow: 'bg-yellow-200 scale-105',
-  blue: 'bg-blue-300 scale-105',
+  green: 'bg-green-300 scale-105 shadow-[0_0_25px_theme(colors.green.400)]',
+  red: 'bg-red-300 scale-105 shadow-[0_0_25px_theme(colors.red.400)]',
+  yellow: 'bg-yellow-200 scale-105 shadow-[0_0_25px_theme(colors.yellow.300)]',
+  blue: 'bg-blue-300 scale-105 shadow-[0_0_25px_theme(colors.blue.400)]',
 };
 
 const SimonSaysGame: React.FC<SimonSaysGameProps> = ({ onBack }) => {
@@ -28,18 +28,6 @@ const SimonSaysGame: React.FC<SimonSaysGameProps> = ({ onBack }) => {
   const [level, setLevel] = useState(0);
   const [gameState, setGameState] = useState<'start' | 'computer' | 'player' | 'over'>('start');
   const [highScore, setHighScore] = useLocalStorage('simon-says-hs', 0);
-
-  const playSound = (color: string) => {
-    // A simple synth sound - we can't import the full audio utils here, so let's mock it
-    const frequencies: { [key: string]: number } = {
-        green: 329.63, // E4
-        red: 440.00, // A4
-        yellow: 587.33, // D5
-        blue: 659.25, // E5
-    };
-    // Placeholder for sound playing logic
-    // In a real scenario, this would integrate with a web audio API utility
-  };
 
   const nextLevel = useCallback(() => {
     const nextColor = COLORS[Math.floor(Math.random() * COLORS.length)];
@@ -60,7 +48,7 @@ const SimonSaysGame: React.FC<SimonSaysGameProps> = ({ onBack }) => {
       let i = 0;
       const interval = setInterval(() => {
         setActiveColor(sequence[i]);
-        playSound(sequence[i]);
+        playSimonSound(sequence[i]);
         setTimeout(() => setActiveColor(null), 300);
         i++;
         if (i >= sequence.length) {
@@ -74,7 +62,7 @@ const SimonSaysGame: React.FC<SimonSaysGameProps> = ({ onBack }) => {
   const handleColorClick = (color: string) => {
     if (gameState !== 'player') return;
 
-    playSound(color);
+    playSimonSound(color);
     const newPlayerSequence = [...playerSequence, color];
     setPlayerSequence(newPlayerSequence);
 
@@ -109,7 +97,7 @@ const SimonSaysGame: React.FC<SimonSaysGameProps> = ({ onBack }) => {
 
     return (
         <div className="flex flex-col items-center">
-            <p className="text-2xl font-bold mb-4">Level: {level}</p>
+            <p className="text-2xl font-bold mb-4">Level: <span className="animate-score-pop" key={level}>{level}</span></p>
             <p className="text-xl text-slate-400 mb-4 h-8">
               {gameState === 'computer' ? 'Watch...' : 'Your Turn...'}
             </p>

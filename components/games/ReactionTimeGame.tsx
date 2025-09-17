@@ -78,7 +78,7 @@ const ReactionTimeGame: React.FC<ReactionTimeGameProps> = ({ onBack }) => {
         );
       case 'active':
         return (
-          <div className="w-full h-64 bg-emerald-400 rounded-lg flex items-center justify-center cursor-pointer animate-pulse-glow" onClick={handleBoxClick}>
+          <div className="w-full h-64 bg-emerald-400 rounded-lg flex items-center justify-center cursor-pointer animate-pulse-glow-emerald" onClick={handleBoxClick}>
             <p className="text-5xl font-bold text-white" style={{animation: 'ping 1s cubic-bezier(0, 0, 0.2, 1)'}}>CLICK!</p>
           </div>
         );
@@ -91,7 +91,7 @@ const ReactionTimeGame: React.FC<ReactionTimeGameProps> = ({ onBack }) => {
              {score === -1 ? (
                 <h2 className="text-4xl font-bold text-red-500 mb-4">Too Soon!</h2>
              ) : (
-                <h2 className="text-4xl font-bold mb-4">Your Time: <span className="text-cyan-400">{score}ms</span></h2>
+                <h2 className="text-4xl font-bold mb-4">Your Time: <span className="text-cyan-400 animate-score-pop">{score}ms</span></h2>
              )}
             <p className="text-slate-400 mb-8">Best: {highScore}ms. Can you beat it?</p>
             <StyledButton onClick={startGame}>Play Again</StyledButton>

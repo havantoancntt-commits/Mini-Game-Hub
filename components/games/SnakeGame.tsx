@@ -116,7 +116,7 @@ const SnakeGame: React.FC<SnakeGameProps> = ({ onBack }) => {
   return (
     <div className="flex flex-col items-center">
       <div className="mb-4 flex justify-between w-full max-w-sm text-xl font-bold text-slate-300">
-        <div>Score: <span className="text-white">{score}</span></div>
+        <div>Score: <span className="text-white animate-score-pop" key={score}>{score}</span></div>
         <div>Best: <span className="text-yellow-400">{highScore}</span></div>
       </div>
       <div
@@ -133,7 +133,7 @@ const SnakeGame: React.FC<SnakeGameProps> = ({ onBack }) => {
         {snake.map((segment, index) => (
           <div
             key={index}
-            className={`absolute ${index === 0 ? 'bg-cyan-400' : 'bg-cyan-600'} rounded-sm`}
+            className={`absolute ${index === 0 ? 'bg-cyan-400 drop-shadow-[0_0_6px_theme(colors.cyan.300)]' : 'bg-cyan-600'} rounded-sm`}
             style={{
               left: segment.x * TILE_SIZE,
               top: segment.y * TILE_SIZE,
@@ -143,7 +143,7 @@ const SnakeGame: React.FC<SnakeGameProps> = ({ onBack }) => {
           />
         ))}
         <div
-          className="absolute bg-fuchsia-500 rounded-full"
+          className="absolute bg-fuchsia-500 rounded-full drop-shadow-[0_0_8px_theme(colors.fuchsia.400)]"
           style={{
             left: food.x * TILE_SIZE,
             top: food.y * TILE_SIZE,

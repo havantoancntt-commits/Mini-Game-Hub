@@ -13,6 +13,16 @@ import Game2048 from './components/games/Game2048';
 import FlappyBirdGame from './components/games/FlappyBirdGame';
 import { GameId } from './types';
 import Footer from './components/Footer';
+import RhythmOrbGame from './components/games/RhythmOrbGame';
+import GravityShiftGame from './components/games/GravityShiftGame';
+import ColorFusionGame from './components/games/ColorFusionGame';
+import EchoMazeGame from './components/games/EchoMazeGame';
+import AstroDriftGame from './components/games/AstroDriftGame';
+import CodeBreakerAIGame from './components/games/CodeBreakerAIGame';
+import GlyphPainterGame from './components/games/GlyphPainterGame';
+import TimeWarpPinballGame from './components/games/TimeWarpPinballGame';
+import StackNBalanceGame from './components/games/StackNBalanceGame';
+import PathFinderGame from './components/games/PathFinderGame';
 
 const App: React.FC = () => {
   const [selectedGame, setSelectedGame] = useState<GameId | null>(null);
@@ -47,6 +57,26 @@ const App: React.FC = () => {
         return <Game2048 onBack={handleBackToMenu} />;
       case 'flappy-bird':
         return <FlappyBirdGame onBack={handleBackToMenu} />;
+      case 'rhythm-orb':
+        return <RhythmOrbGame onBack={handleBackToMenu} />;
+      case 'gravity-shift':
+        return <GravityShiftGame onBack={handleBackToMenu} />;
+      case 'color-fusion':
+        return <ColorFusionGame onBack={handleBackToMenu} />;
+      case 'echo-maze':
+        return <EchoMazeGame onBack={handleBackToMenu} />;
+      case 'astro-drift':
+        return <AstroDriftGame onBack={handleBackToMenu} />;
+      case 'code-breaker-ai':
+        return <CodeBreakerAIGame onBack={handleBackToMenu} />;
+      case 'glyph-painter':
+        return <GlyphPainterGame onBack={handleBackToMenu} />;
+      case 'time-warp-pinball':
+        return <TimeWarpPinballGame onBack={handleBackToMenu} />;
+      case 'stack-n-balance':
+        return <StackNBalanceGame onBack={handleBackToMenu} />;
+      case 'path-finder':
+        return <PathFinderGame onBack={handleBackToMenu} />;
       default:
         return <GameMenu onSelectGame={handleSelectGame} />;
     }
@@ -57,7 +87,9 @@ const App: React.FC = () => {
       <div className="w-full max-w-5xl mx-auto flex flex-col flex-grow">
         <Header title="Mini-Game Hub" />
         <main className="mt-12 flex-grow flex items-center justify-center">
-          {renderGame()}
+          <div key={selectedGame || 'menu'} className="w-full h-full flex items-center justify-center">
+            {renderGame()}
+          </div>
         </main>
         <Footer />
       </div>

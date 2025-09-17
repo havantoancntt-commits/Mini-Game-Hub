@@ -114,7 +114,7 @@ const WordScrambleGame: React.FC<WordScrambleGameProps> = ({ onBack }) => {
     return (
       <>
         <div className="mb-6 flex justify-between w-full max-w-sm text-xl font-bold text-slate-300">
-            <div>Score: <span className="text-white">{score}</span></div>
+            <div>Score: <span className="text-white animate-score-pop" key={score}>{score}</span></div>
             <div>Best: <span className="text-yellow-400">{highScore}</span></div>
         </div>
 

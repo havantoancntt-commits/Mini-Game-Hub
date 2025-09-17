@@ -131,7 +131,7 @@ const MemoryMatchGame: React.FC<MemoryMatchGameProps> = ({ onBack }) => {
   return (
     <div className="flex flex-col items-center">
       <div className="mb-6 flex justify-between w-full max-w-md text-xl font-bold text-slate-300">
-        <div>Moves: <span className="text-white">{moves}</span></div>
+        <div>Moves: <span className="text-white animate-score-pop" key={moves}>{moves}</span></div>
         <div>Best: <span className="text-yellow-400">{highScore === Infinity ? 'N/A' : highScore}</span></div>
       </div>
       <div className="grid grid-cols-4 gap-4 max-w-md mx-auto">
@@ -141,7 +141,7 @@ const MemoryMatchGame: React.FC<MemoryMatchGameProps> = ({ onBack }) => {
               <div className="absolute w-full h-full bg-slate-700 hover:bg-slate-600 transition-colors rounded-lg flex items-center justify-center text-3xl font-bold backface-hidden cursor-pointer">
                 ?
               </div>
-              <div className={`absolute w-full h-full rounded-lg flex items-center justify-center text-4xl rotate-y-180 backface-hidden ${card.isMatched ? 'bg-emerald-500 animate-pulse-glow' : 'bg-cyan-500'}`}>
+              <div className={`absolute w-full h-full rounded-lg flex items-center justify-center text-4xl rotate-y-180 backface-hidden ${card.isMatched ? 'bg-emerald-500 animate-pulse-glow-cyan' : 'bg-cyan-500'}`}>
                 {card.value}
               </div>
             </div>
