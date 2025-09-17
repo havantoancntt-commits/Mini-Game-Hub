@@ -46,7 +46,7 @@ const WordScrambleGame: React.FC<WordScrambleGameProps> = ({ onBack, onNewHighSc
         if (gameState === 'playing' && timeLeft > 0) {
             const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
             return () => clearTimeout(timer);
-        } else if (timeLeft === 0 && gameState === 'playing') {
+        } else if (timeLeft <= 0 && gameState === 'playing') {
             setGameState('over');
             if (score > highScore) {
                 setHighScore(score);
@@ -115,7 +115,9 @@ const WordScrambleGame: React.FC<WordScrambleGameProps> = ({ onBack, onNewHighSc
                             />
                             <button type="submit" className="hidden">Submit</button>
                         </form>
-                        <p className={`mt-4 text-2xl font-bold h-8 transition-opacity duration-300 ${feedback ? 'opacity-100' : 'opacity-0'} ${feedback === 'Correct!' ? 'text-green-400' : 'text-yellow-400'}`}>
+                        <p 
+                            aria-live="polite"
+                            className={`mt-4 text-2xl font-bold h-8 transition-opacity duration-300 ${feedback ? 'opacity-100' : 'opacity-0'} ${feedback === 'Correct!' ? 'text-green-400' : 'text-yellow-400'}`}>
                             {feedback}
                         </p>
                     </>

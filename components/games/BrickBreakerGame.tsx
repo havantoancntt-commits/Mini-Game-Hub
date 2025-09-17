@@ -12,6 +12,7 @@ const LOGICAL_WIDTH = 500;
 const LOGICAL_HEIGHT = 600;
 const PADDLE_WIDTH = 100;
 const PADDLE_HEIGHT = 20;
+const PADDLE_SPEED = 25;
 const BALL_RADIUS = 10;
 const BRICK_ROWS = 5;
 const BRICK_COLS = 8;
@@ -139,7 +140,7 @@ const BrickBreakerGame: React.FC<BrickBreakerGameProps> = ({ onBack, onNewHighSc
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-        if (!gameAreaRef.current) return;
+        if (!gameAreaRef.current || gameState !== 'playing') return;
         const rect = gameAreaRef.current.getBoundingClientRect();
         const scaleX = LOGICAL_WIDTH / rect.width;
         const mouseXInGame = (e.clientX - rect.left) * scaleX;
@@ -147,17 +148,31 @@ const BrickBreakerGame: React.FC<BrickBreakerGameProps> = ({ onBack, onNewHighSc
         setPaddleX(Math.max(0, Math.min(LOGICAL_WIDTH - PADDLE_WIDTH, newPaddleX)));
     };
     const gameDiv = gameAreaRef.current;
-    if (gameDiv && gameState === 'playing') {
+    if (gameDiv) {
         gameDiv.addEventListener('mousemove', handleMouseMove);
     }
     return () => gameDiv?.removeEventListener('mousemove', handleMouseMove);
   }, [gameState]);
 
+  useEffect(() => {
+      const handleKeyDown = (e: KeyboardEvent) => {
+          if (gameState !== 'playing') return;
+          if (e.key === 'ArrowLeft') {
+              setPaddleX(prev => Math.max(0, prev - PADDLE_SPEED));
+          } else if (e.key === 'ArrowRight') {
+              setPaddleX(prev => Math.min(LOGICAL_WIDTH - PADDLE_WIDTH, prev + PADDLE_SPEED));
+          }
+      };
+
+      window.addEventListener('keydown', handleKeyDown);
+      return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [gameState]);
+
 
   return (
     <div className="flex flex-col items-center p-6 sm:p-8 w-full max-w-lg mx-auto text-center bg-slate-800/60 backdrop-blur-md rounded-2xl border border-slate-700/50 animate-fade-in-up">
       <h2 className="text-4xl font-bold mb-2">Brick Breaker</h2>
-      <p className="text-slate-400 mb-4">Move your mouse to control the paddle.</p>
+      <p className="text-slate-400 mb-4">Move mouse or use arrow keys to control the paddle.</p>
        <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 mb-4 text-lg sm:text-xl">
           <p aria-live="polite">Score: <span key={scoreKey} className="font-bold text-cyan-400 animate-score-pop">{score}</span></p>
           <p aria-live="polite">Lives: <span className="font-bold text-red-400">{lives}</span></p>

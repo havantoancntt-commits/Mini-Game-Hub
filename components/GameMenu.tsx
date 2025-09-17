@@ -27,7 +27,7 @@ const LayersIcon = <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12"
 const ArrowsRightLeftIcon = <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16l-4-4m0 0l4-4m-4 4h18m-4 8l4-4m0 0l-4-4m4 4H3" /></svg>;
 
 
-// Fix: Explicitly type the games array to ensure `game.id` is of type `GameId`.
+// Moved games array outside component to prevent re-creation on every render.
 const games: { id: GameId; title: string; description: string; icon: React.ReactNode }[] = [
     { id: 'reaction-time', title: 'Reaction Time', description: 'Test your reflexes. Click when the box turns green!', icon: BoltIcon },
     { id: 'memory-match', title: 'Memory Match', description: 'Flip cards and find all the matching pairs.', icon: CpuChipIcon },

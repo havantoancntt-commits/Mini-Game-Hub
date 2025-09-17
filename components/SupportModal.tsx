@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import StyledButton from './StyledButton';
 
 interface SupportModalProps {
@@ -9,11 +9,69 @@ interface SupportModalProps {
 }
 
 const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose, message, isLoading }) => {
+  const modalRef = useRef<HTMLDivElement>(null);
+  const previouslyFocusedElement = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      previouslyFocusedElement.current = document.activeElement as HTMLElement;
+      const focusableElements = modalRef.current?.querySelectorAll<HTMLElement>(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+      const firstElement = focusableElements?.[0];
+      const lastElement = focusableElements?.[focusableElements.length - 1];
+
+      // Wait for the modal to be fully rendered before focusing
+      requestAnimationFrame(() => {
+        firstElement?.focus();
+      });
+
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key !== 'Tab') return;
+        if (e.shiftKey) { // Shift + Tab
+          if (document.activeElement === firstElement) {
+            lastElement?.focus();
+            e.preventDefault();
+          }
+        } else { // Tab
+          if (document.activeElement === lastElement) {
+            firstElement?.focus();
+            e.preventDefault();
+          }
+        }
+      };
+      
+      const handleEscape = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') {
+          onClose();
+        }
+      };
+
+      document.addEventListener('keydown', handleKeyDown);
+      document.addEventListener('keydown', handleEscape);
+
+      return () => {
+        document.removeEventListener('keydown', handleKeyDown);
+        document.removeEventListener('keydown', handleEscape);
+        previouslyFocusedElement.current?.focus();
+      };
+    }
+  }, [isOpen, onClose]);
+
+
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4 animate-fade-in">
-      <div className="bg-slate-800/80 backdrop-blur-lg rounded-2xl shadow-2xl shadow-cyan-500/10 p-6 sm:p-8 w-full max-w-lg border border-slate-700/50 relative text-center">
+    <div 
+      className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4 animate-fade-in"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="support-modal-title"
+    >
+      <div 
+        ref={modalRef}
+        className="bg-slate-800/80 backdrop-blur-lg rounded-2xl shadow-2xl shadow-cyan-500/10 p-6 sm:p-8 w-full max-w-lg border border-slate-700/50 relative text-center"
+      >
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-slate-500 hover:text-white transition-colors"
@@ -23,7 +81,10 @@ const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose, message, i
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
-        <h2 className="text-2xl sm:text-3xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-fuchsia-500">
+        <h2 
+          id="support-modal-title"
+          className="text-2xl sm:text-3xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-fuchsia-500"
+        >
           Thank You!
         </h2>
         
@@ -40,7 +101,7 @@ const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose, message, i
         </div>
 
         <div className="mt-8">
-            <StyledButton onClick={() => window.open('https://github.com/sponsors/google', '_blank')}>
+            <StyledButton onClick={() => window.open('https://www.paypal.me/TOANVAIO', '_blank')}>
                 Donate Here
             </StyledButton>
         </div>

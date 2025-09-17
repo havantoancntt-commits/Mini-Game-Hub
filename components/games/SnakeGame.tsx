@@ -43,6 +43,14 @@ const SnakeGame: React.FC<SnakeGameProps> = ({ onBack, onNewHighScore }) => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [direction]);
 
+  // Game speed increases with score
+  useEffect(() => {
+    if (!isGameOver) {
+      const newSpeed = Math.max(50, 200 - score * 5); // Speed increases, minimum delay of 50ms
+      setSpeed(newSpeed);
+    }
+  }, [score, isGameOver]);
+
   const resetGame = () => {
     setSnake([{ x: 10, y: 10 }]);
     setFood(getRandomPosition());
