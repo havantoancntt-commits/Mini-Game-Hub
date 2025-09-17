@@ -57,21 +57,24 @@ interface GameMenuProps {
 
 const GameMenu: React.FC<GameMenuProps> = ({ onSelectGame }) => {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-      {games.map((game, index) => (
-        <div
-          key={game.id}
-          className="animate-fade-in-up"
-          style={{ animationDelay: `${index * 50}ms`, animationFillMode: 'backwards' }}
-        >
-          <GameCard
-            title={game.title}
-            description={game.description}
-            icon={game.icon}
-            onSelect={() => onSelectGame(game.id)}
-          />
-        </div>
-      ))}
+    <div className="w-full">
+      <h2 className="text-2xl font-bold text-center mb-8 text-slate-300 tracking-wider">Choose a Game</h2>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+        {games.map((game, index) => (
+          <div
+            key={game.id}
+            className="animate-fade-in-up"
+            style={{ animationDelay: `${index * 50}ms`, animationFillMode: 'backwards' }}
+          >
+            <GameCard
+              title={game.title}
+              description={game.description}
+              icon={game.icon}
+              onSelect={() => onSelectGame(game.id)}
+            />
+          </div>
+        ))}
+      </div>
     </div>
   );
 };

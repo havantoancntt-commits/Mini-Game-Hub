@@ -7,6 +7,7 @@ import Header from './components/Header';
 import GameMenu from './components/GameMenu';
 import Footer from './components/Footer';
 import SupportModal from './components/SupportModal';
+import ErrorBoundary from './components/ErrorBoundary';
 
 // Spinner component for Suspense fallback
 const GameLoadingSpinner: React.FC = () => (
@@ -107,7 +108,7 @@ const App: React.FC = () => {
 
   const CurrentGame = useMemo(() => {
     if (!selectedGame) return null;
-    return <div key={selectedGame}>{gameComponents[selectedGame]}</div>;
+    return gameComponents[selectedGame];
   }, [selectedGame, gameComponents]);
 
   return (
@@ -116,9 +117,13 @@ const App: React.FC = () => {
         <Header title="Mini-Game Hub" />
         <main className="w-full max-w-7xl mx-auto mt-8 flex-grow flex items-center justify-center">
           {CurrentGame ? (
-            <Suspense fallback={<GameLoadingSpinner />}>
-              {CurrentGame}
-            </Suspense>
+            <div className="w-full animate-fade-in">
+              <ErrorBoundary>
+                <Suspense fallback={<GameLoadingSpinner />}>
+                  {CurrentGame}
+                </Suspense>
+              </ErrorBoundary>
+            </div>
           ) : (
             <GameMenu onSelectGame={handleSelectGame} />
           )}

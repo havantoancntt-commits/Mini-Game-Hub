@@ -7,9 +7,14 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
       body {
         font-family: 'Inter', sans-serif;
+        background-color: #0f172a; /* bg-slate-900 */
+      }
+      ::selection {
+        background-color: hsla(188, 95%, 41%, 0.3);
       }
       @keyframes fade-in {
         from { opacity: 0; }
@@ -41,45 +46,59 @@
       }
       @keyframes aurora {
         from {
-            background-position: 50% 50%, 50% 50%;
+            background-position: 0% 50%;
         }
         to {
-            background-position: 350% 50%, 350% 50%;
+            background-position: 100% 50%;
         }
       }
       .aurora-background {
+        --aurora-color-1: hsla(212, 85%, 55%, 0.1);
+        --aurora-color-2: hsla(289, 75%, 50%, 0.1);
+        --aurora-color-3: hsla(180, 75%, 50%, 0.1);
+        --aurora-color-4: hsla(340, 75%, 55%, 0.1);
         background-image:
-            radial-gradient(at 20% 20%, hsla(212, 85%, 55%, 0.15) 0px, transparent 50%),
-            radial-gradient(at 80% 20%, hsla(289, 75%, 50%, 0.15) 0px, transparent 50%),
-            radial-gradient(at 20% 80%, hsla(180, 75%, 50%, 0.15) 0px, transparent 50%),
-            radial-gradient(at 80% 80%, hsla(340, 75%, 55%, 0.15) 0px, transparent 50%);
-        background-size: 500% 500%;
-        animation: aurora 20s infinite linear;
+          radial-gradient(at 20% 20%, var(--aurora-color-1) 0px, transparent 50%),
+          radial-gradient(at 80% 20%, var(--aurora-color-2) 0px, transparent 50%),
+          radial-gradient(at 20% 80%, var(--aurora-color-3) 0px, transparent 50%),
+          radial-gradient(at 80% 80%, var(--aurora-color-4) 0px, transparent 50%);
+        background-size: 200% 200%;
+        animation: aurora 30s infinite linear;
       }
+
+      @keyframes shimmer {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+      }
+      .animate-shimmer {
+        background-size: 200% auto;
+        animation: shimmer 5s linear infinite;
+      }
+
       .text-3d-glow {
         text-shadow: 
-          0 0 5px hsla(190, 80%, 60%, 0.5),
-          0 0 10px hsla(190, 80%, 60%, 0.4),
-          0 0 20px hsla(286, 81%, 58%, 0.3),
-          0 0 40px hsla(286, 81%, 58%, 0.2);
+          0 0 4px hsla(190, 80%, 60%, 0.3),
+          0 0 8px hsla(190, 80%, 60%, 0.2),
+          0 0 16px hsla(286, 81%, 58%, 0.2),
+          0 0 32px hsla(286, 81%, 58%, 0.1);
       }
        @keyframes pulse-glow-cyan {
-        0%, 100% { box-shadow: 0 0 20px hsla(188, 95%, 41%, 0.3); }
-        50% { box-shadow: 0 0 40px hsla(188, 95%, 41%, 0.7); }
+        0%, 100% { box-shadow: 0 0 15px hsla(188, 95%, 41%, 0.2); }
+        50% { box-shadow: 0 0 30px hsla(188, 95%, 41%, 0.5); }
       }
       .animate-pulse-glow-cyan {
         animation: pulse-glow-cyan 2s infinite ease-in-out;
       }
       @keyframes pulse-glow-emerald {
-        0%, 100% { box-shadow: 0 0 25px hsla(158, 82%, 40%, 0.4); }
-        50% { box-shadow: 0 0 50px hsla(158, 82%, 40%, 0.8); }
+        0%, 100% { box-shadow: 0 0 20px hsla(158, 82%, 40%, 0.3); }
+        50% { box-shadow: 0 0 40px hsla(158, 82%, 40%, 0.6); }
       }
       .animate-pulse-glow-emerald {
         animation: pulse-glow-emerald 1.5s infinite ease-in-out;
       }
        @keyframes pulse-glow-yellow {
-        0%, 100% { box-shadow: 0 0 25px hsla(50, 96%, 53%, 0.4); }
-        50% { box-shadow: 0 0 50px hsla(50, 96%, 53%, 0.8); }
+        0%, 100% { box-shadow: 0 0 20px hsla(50, 96%, 53%, 0.3); }
+        50% { box-shadow: 0 0 40px hsla(50, 96%, 53%, 0.6); }
       }
       .animate-pulse-glow-yellow {
         animation: pulse-glow-yellow 2s infinite ease-in-out;
