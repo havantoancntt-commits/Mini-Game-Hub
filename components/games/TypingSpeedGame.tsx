@@ -94,11 +94,11 @@ const TypingSpeedGame: React.FC<TypingSpeedGameProps> = ({ onBack, onNewHighScor
   };
 
   return (
-    <div className="flex flex-col items-center p-4 w-full max-w-3xl mx-auto text-center animate-fade-in-up">
+    <div className="flex flex-col items-center p-6 sm:p-8 w-full max-w-3xl mx-auto text-center bg-slate-800/60 backdrop-blur-md rounded-2xl border border-slate-700/50 animate-fade-in-up">
       <h2 className="text-4xl font-bold mb-4">Typing Speed Test</h2>
       <p className="text-slate-400 mb-8">Type the text below as fast and accurately as you can.</p>
 
-      <div className="w-full p-6 bg-slate-800 rounded-lg text-2xl tracking-wider font-mono mb-6 border border-slate-700">
+      <div className="w-full p-4 sm:p-6 bg-slate-900/50 rounded-lg text-lg sm:text-2xl tracking-wider font-mono mb-6 border border-slate-700">
         <p>{renderText()}</p>
       </div>
 
@@ -107,7 +107,7 @@ const TypingSpeedGame: React.FC<TypingSpeedGameProps> = ({ onBack, onNewHighScor
         type="text"
         value={inputValue}
         onChange={handleInputChange}
-        className="w-full p-4 bg-slate-700 text-white rounded-md text-xl focus:outline-none focus:ring-2 focus:ring-cyan-500"
+        className="w-full p-4 bg-slate-700/80 text-white rounded-md text-xl focus:outline-none focus:ring-2 focus:ring-cyan-500"
         placeholder={isFinished ? 'Game Over!' : 'Start typing here...'}
         disabled={isFinished}
         autoFocus
@@ -116,12 +116,12 @@ const TypingSpeedGame: React.FC<TypingSpeedGameProps> = ({ onBack, onNewHighScor
       {isFinished ? (
         <div className="mt-8 text-center animate-fade-in">
           <h3 className="text-3xl font-bold text-cyan-400 mb-4">Results</h3>
-          <div className="flex justify-center gap-8 text-white">
-            <div>
+          <div className="flex flex-col sm:flex-row justify-center items-center gap-4 sm:gap-8 text-white">
+            <div className="w-full sm:w-auto">
               <p className="text-4xl font-bold animate-score-pop">{wpm}</p>
               <p className="text-slate-400">WPM</p>
             </div>
-            <div>
+            <div className="w-full sm:w-auto">
               <p className="text-4xl font-bold animate-score-pop">{accuracy}%</p>
               <p className="text-slate-400">Accuracy</p>
             </div>
@@ -135,8 +135,9 @@ const TypingSpeedGame: React.FC<TypingSpeedGameProps> = ({ onBack, onNewHighScor
          <p className="mt-4 text-lg">High Score: <span className="font-bold text-yellow-400">{highScore}</span> WPM</p>
       )}
 
-      <button onClick={onBack} className="mt-12 text-slate-400 hover:text-cyan-400 transition-colors">
-        &larr; Back to Menu
+      <button onClick={onBack} className="group mt-12 text-slate-400 hover:text-cyan-400 transition-colors flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+        <span>Back to Menu</span>
       </button>
     </div>
   );

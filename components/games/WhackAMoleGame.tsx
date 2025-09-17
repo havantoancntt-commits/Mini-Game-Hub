@@ -20,49 +20,56 @@ const WhackAMoleGame: React.FC<WhackAMoleGameProps> = ({ onBack, onNewHighScore 
   const scoreKey = React.useMemo(() => Date.now(), [score]);
 
   const popMole = useCallback(() => {
-    const randomIndex = Math.floor(Math.random() * moles.length);
+    if (gameState !== 'playing') return;
+    const randomIndex = Math.floor(Math.random() * 9);
     setMoles(prevMoles => {
-        const newMoles = [...prevMoles];
+        const newMoles = Array(9).fill(false); // only one mole at a time
         newMoles[randomIndex] = true;
         return newMoles;
     });
 
     setTimeout(() => {
-        setMoles(prevMoles => {
-            const newMoles = [...prevMoles];
+      setMoles(prevMoles => {
+          const newMoles = [...prevMoles];
+          if(newMoles[randomIndex]) { // if it wasn't whacked
             newMoles[randomIndex] = false;
-            return newMoles;
-        });
-    }, Math.random() * 500 + 500); // Mole visible for 0.5-1s
-  }, [moles.length]);
+          }
+          return newMoles;
+      });
+    }, Math.random() * 400 + 600); // Mole visible for 0.6-1s
+  }, [gameState]);
+
 
   useEffect(() => {
-      if (gameState !== 'playing') return;
+      if (gameState !== 'playing' || timeLeft <= 0) return;
 
-      const gameInterval = setInterval(popMole, 700);
+      const gameInterval = setInterval(popMole, 800);
       const timerInterval = setInterval(() => {
-          setTimeLeft(prev => prev - 1);
+          setTimeLeft(prev => {
+              if (prev <= 1) {
+                  clearInterval(gameInterval);
+                  clearInterval(timerInterval);
+                  setGameState('over');
+                  playGameOverSound();
+                  if (score > highScore) {
+                      setHighScore(score);
+                      onNewHighScore('Whack-A-Mole', score);
+                  }
+                  return 0;
+              }
+              return prev - 1;
+          });
       }, 1000);
-
-      if (timeLeft <= 0) {
-          setGameState('over');
-          playGameOverSound();
-          clearInterval(gameInterval);
-          clearInterval(timerInterval);
-          if (score > highScore) {
-              setHighScore(score);
-              onNewHighScore('Whack-A-Mole', score);
-          }
-      }
 
       return () => {
           clearInterval(gameInterval);
           clearInterval(timerInterval);
       };
-  }, [gameState, popMole, timeLeft, score, highScore, onNewHighScore, setHighScore]);
+  }, [gameState, popMole, score, highScore, onNewHighScore, setHighScore, timeLeft]);
   
   const startGame = () => {
       setScore(0);
+      setMoles(Array(9).fill(false));
       setTimeLeft(GAME_DURATION);
       setGameState('playing');
   };
@@ -79,7 +86,7 @@ const WhackAMoleGame: React.FC<WhackAMoleGameProps> = ({ onBack, onNewHighScore 
   };
 
   return (
-    <div className="flex flex-col items-center p-4 w-full max-w-md mx-auto text-center animate-fade-in-up">
+    <div className="flex flex-col items-center p-6 sm:p-8 w-full max-w-sm mx-auto text-center bg-slate-800/60 backdrop-blur-md rounded-2xl border border-slate-700/50 animate-fade-in-up">
       <h2 className="text-4xl font-bold mb-2">Whack-A-Mole</h2>
       <p className="text-slate-400 mb-4">Click the moles as fast as you can!</p>
       
@@ -89,7 +96,7 @@ const WhackAMoleGame: React.FC<WhackAMoleGameProps> = ({ onBack, onNewHighScore 
       </div>
        <p className="mb-4 text-lg">High Score: <span className="font-bold text-yellow-400">{highScore}</span></p>
 
-      <div className="relative w-80 h-80 md:w-96 md:h-96 bg-green-800 rounded-lg p-2">
+      <div className="relative w-full max-w-xs sm:max-w-sm aspect-square bg-green-800/70 rounded-lg p-2">
          {(gameState === 'idle' || gameState === 'over') && (
             <div className="absolute inset-0 bg-black bg-opacity-70 flex flex-col items-center justify-center z-10 rounded-lg">
                 <h3 className="text-3xl font-bold text-white mb-4">
@@ -102,15 +109,16 @@ const WhackAMoleGame: React.FC<WhackAMoleGameProps> = ({ onBack, onNewHighScore 
         )}
         <div className="grid grid-cols-3 gap-2 w-full h-full">
             {moles.map((isUp, index) => (
-                <div key={index} className="w-full h-full bg-yellow-900/50 rounded-full flex items-center justify-center overflow-hidden cursor-pointer" onClick={() => whackMole(index)}>
-                   <div className={`w-16 h-16 bg-yellow-800 rounded-full transition-transform duration-200 ${isUp ? 'translate-y-0' : 'translate-y-full'}`} />
+                <div key={index} className="w-full h-full bg-yellow-900/50 rounded-full flex items-center justify-center overflow-hidden cursor-pointer p-2" onClick={() => whackMole(index)}>
+                   <div className={`w-full h-full bg-yellow-800 rounded-full transition-transform duration-150 ${isUp ? 'translate-y-0 scale-100' : 'translate-y-full scale-50'}`} />
                 </div>
             ))}
         </div>
       </div>
 
-      <button onClick={onBack} className="mt-12 text-slate-400 hover:text-cyan-400 transition-colors">
-        &larr; Back to Menu
+      <button onClick={onBack} className="group mt-12 text-slate-400 hover:text-cyan-400 transition-colors flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+        <span>Back to Menu</span>
       </button>
     </div>
   );

@@ -9,8 +9,8 @@ interface FlappyBirdGameProps {
   onNewHighScore: (gameName: string, score: number) => void;
 }
 
-const GAME_WIDTH = 500;
-const GAME_HEIGHT = 600;
+const LOGICAL_WIDTH = 500;
+const LOGICAL_HEIGHT = 600;
 const BIRD_SIZE = 30;
 const GRAVITY = 0.6;
 const JUMP_STRENGTH = -10;
@@ -20,7 +20,7 @@ const PIPE_SPEED = -4;
 const PIPE_INTERVAL = 1500; // ms
 
 const FlappyBirdGame: React.FC<FlappyBirdGameProps> = ({ onBack, onNewHighScore }) => {
-  const [birdPosition, setBirdPosition] = useState(GAME_HEIGHT / 2);
+  const [birdPosition, setBirdPosition] = useState(LOGICAL_HEIGHT / 2);
   const [birdVelocity, setBirdVelocity] = useState(0);
   const [pipes, setPipes] = useState<{ x: number; topHeight: number }[]>([]);
   const [score, setScore] = useState(0);
@@ -31,23 +31,27 @@ const FlappyBirdGame: React.FC<FlappyBirdGameProps> = ({ onBack, onNewHighScore 
   const scoreKey = React.useMemo(() => Date.now(), [score]);
 
   const resetGame = () => {
-    setBirdPosition(GAME_HEIGHT / 2);
+    setBirdPosition(LOGICAL_HEIGHT / 2);
     setBirdVelocity(0);
     setPipes([]);
     setScore(0);
     setGameState('idle');
     if(pipeTimerRef.current) window.clearInterval(pipeTimerRef.current);
+    pipeTimerRef.current = null;
   };
 
   const startGame = () => {
-    resetGame();
+    setBirdPosition(LOGICAL_HEIGHT / 2);
+    setBirdVelocity(0);
+    setPipes([]);
+    setScore(0);
     setGameState('playing');
     pipeTimerRef.current = window.setInterval(() => {
         setPipes(prev => [
             ...prev,
             {
-                x: GAME_WIDTH,
-                topHeight: Math.random() * (GAME_HEIGHT - PIPE_GAP - 100) + 50,
+                x: LOGICAL_WIDTH,
+                topHeight: Math.random() * (LOGICAL_HEIGHT - PIPE_GAP - 100) + 50,
             },
         ]);
     }, PIPE_INTERVAL);
@@ -57,6 +61,7 @@ const FlappyBirdGame: React.FC<FlappyBirdGameProps> = ({ onBack, onNewHighScore 
     playGameOverSound();
     setGameState('over');
     if (pipeTimerRef.current) window.clearInterval(pipeTimerRef.current);
+    pipeTimerRef.current = null;
     if (score > highScore) {
         setHighScore(score);
         onNewHighScore('Flappy Bird', score);
@@ -71,8 +76,8 @@ const FlappyBirdGame: React.FC<FlappyBirdGameProps> = ({ onBack, onNewHighScore 
     let newPosition = birdPosition + newVelocity;
     
     // Floor collision
-    if (newPosition > GAME_HEIGHT - BIRD_SIZE) {
-        newPosition = GAME_HEIGHT - BIRD_SIZE;
+    if (newPosition > LOGICAL_HEIGHT - BIRD_SIZE) {
+        newPosition = LOGICAL_HEIGHT - BIRD_SIZE;
         gameOver();
     }
     
@@ -87,9 +92,10 @@ const FlappyBirdGame: React.FC<FlappyBirdGameProps> = ({ onBack, onNewHighScore 
 
     // Pipe movement & scoring
     let scored = false;
+    const birdCenterX = LOGICAL_WIDTH / 2;
     const newPipes = pipes.map(pipe => {
         const newX = pipe.x + PIPE_SPEED;
-        if (!scored && pipe.x > GAME_WIDTH / 2 + PIPE_SPEED && newX <= GAME_WIDTH / 2 + PIPE_SPEED) {
+        if (!scored && pipe.x > birdCenterX && newX <= birdCenterX) {
             setScore(s => s + 1);
             scored = true;
         }
@@ -98,8 +104,8 @@ const FlappyBirdGame: React.FC<FlappyBirdGameProps> = ({ onBack, onNewHighScore 
     setPipes(newPipes);
 
     // Pipe collision
-    const birdLeft = GAME_WIDTH / 2 - BIRD_SIZE / 2;
-    const birdRight = GAME_WIDTH / 2 + BIRD_SIZE / 2;
+    const birdLeft = LOGICAL_WIDTH / 2 - BIRD_SIZE / 2;
+    const birdRight = LOGICAL_WIDTH / 2 + BIRD_SIZE / 2;
     for (const pipe of pipes) {
         const pipeLeft = pipe.x;
         const pipeRight = pipe.x + PIPE_WIDTH;
@@ -121,6 +127,8 @@ const FlappyBirdGame: React.FC<FlappyBirdGameProps> = ({ onBack, onNewHighScore 
       playJumpSound();
     } else if (gameState === 'idle') {
       startGame();
+    } else if (gameState === 'over') {
+      resetGame();
     }
   };
 
@@ -134,7 +142,7 @@ const FlappyBirdGame: React.FC<FlappyBirdGameProps> = ({ onBack, onNewHighScore 
   }, []);
 
   return (
-    <div className="flex flex-col items-center p-4 w-full max-w-lg mx-auto text-center animate-fade-in-up">
+    <div className="flex flex-col items-center p-6 sm:p-8 w-full max-w-lg mx-auto text-center bg-slate-800/60 backdrop-blur-md rounded-2xl border border-slate-700/50 animate-fade-in-up">
       <h2 className="text-4xl font-bold mb-2">Flappy Bird</h2>
       <p className="text-slate-400 mb-4">Click or press Space to flap.</p>
        <div className="flex gap-8 mb-4">
@@ -143,8 +151,7 @@ const FlappyBirdGame: React.FC<FlappyBirdGameProps> = ({ onBack, onNewHighScore 
       </div>
 
       <div
-        className="bg-sky-800 border-2 border-slate-600 relative overflow-hidden cursor-pointer"
-        style={{ width: GAME_WIDTH, height: GAME_HEIGHT }}
+        className="bg-sky-800/80 border-2 border-slate-600 relative overflow-hidden cursor-pointer w-full aspect-[5/6] rounded-lg"
         onClick={jump}
         tabIndex={0}
         onKeyDown={(e) => e.key === ' ' && jump()}
@@ -152,7 +159,7 @@ const FlappyBirdGame: React.FC<FlappyBirdGameProps> = ({ onBack, onNewHighScore 
         {(gameState === 'idle' || gameState === 'over') && (
             <div className="absolute inset-0 bg-black bg-opacity-50 flex flex-col items-center justify-center z-20">
             <h3 className="text-3xl font-bold text-white mb-4">{gameState === 'over' ? 'Game Over' : 'Ready?'}</h3>
-            <StyledButton onClick={(e) => { e.stopPropagation(); gameState === 'over' ? resetGame() : startGame(); }}>
+            <StyledButton onClick={(e) => { e.stopPropagation(); jump(); }}>
                 {gameState === 'over' ? 'Try Again' : 'Start Game'}
             </StyledButton>
             </div>
@@ -161,9 +168,10 @@ const FlappyBirdGame: React.FC<FlappyBirdGameProps> = ({ onBack, onNewHighScore 
         <div
           className="absolute bg-yellow-400 rounded-full"
           style={{ 
-            left: GAME_WIDTH / 2 - BIRD_SIZE / 2, 
-            top: birdPosition, 
-            width: BIRD_SIZE, height: BIRD_SIZE,
+            left: `calc(${(LOGICAL_WIDTH / 2 - BIRD_SIZE / 2) / LOGICAL_WIDTH * 100}% )`,
+            top: `${(birdPosition / LOGICAL_HEIGHT) * 100}%`, 
+            width: `${(BIRD_SIZE / LOGICAL_WIDTH) * 100}%`, 
+            height: `${(BIRD_SIZE / LOGICAL_HEIGHT) * 100}%`,
             transition: 'top 20ms linear',
             filter: 'drop-shadow(0 0 5px rgba(255,255,0,0.7))'
           }}
@@ -174,19 +182,32 @@ const FlappyBirdGame: React.FC<FlappyBirdGameProps> = ({ onBack, onNewHighScore 
             {/* Top pipe */}
             <div
               className="absolute bg-green-500 border-2 border-green-700"
-              style={{ left: pipe.x, top: 0, width: PIPE_WIDTH, height: pipe.topHeight, filter: 'drop-shadow(0 0 5px rgba(0,0,0,0.5))' }}
+              style={{ 
+                  left: `${(pipe.x / LOGICAL_WIDTH) * 100}%`, 
+                  top: 0, 
+                  width: `${(PIPE_WIDTH / LOGICAL_WIDTH) * 100}%`, 
+                  height: `${(pipe.topHeight / LOGICAL_HEIGHT) * 100}%`, 
+                  filter: 'drop-shadow(0 0 5px rgba(0,0,0,0.5))' 
+                }}
             />
             {/* Bottom pipe */}
             <div
               className="absolute bg-green-500 border-2 border-green-700"
-              style={{ left: pipe.x, top: pipe.topHeight + PIPE_GAP, width: PIPE_WIDTH, height: GAME_HEIGHT, filter: 'drop-shadow(0 0 5px rgba(0,0,0,0.5))' }}
+              style={{ 
+                  left: `${(pipe.x / LOGICAL_WIDTH) * 100}%`, 
+                  top: `${((pipe.topHeight + PIPE_GAP) / LOGICAL_HEIGHT) * 100}%`, 
+                  width: `${(PIPE_WIDTH / LOGICAL_WIDTH) * 100}%`, 
+                  bottom: 0,
+                  filter: 'drop-shadow(0 0 5px rgba(0,0,0,0.5))' 
+                }}
             />
           </React.Fragment>
         ))}
       </div>
 
-      <button onClick={onBack} className="mt-12 text-slate-400 hover:text-cyan-400 transition-colors">
-        &larr; Back to Menu
+      <button onClick={onBack} className="group mt-12 text-slate-400 hover:text-cyan-400 transition-colors flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+        <span>Back to Menu</span>
       </button>
     </div>
   );

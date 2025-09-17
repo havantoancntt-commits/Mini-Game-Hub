@@ -13,7 +13,7 @@ const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose, message, i
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4 animate-fade-in">
-      <div className="bg-slate-800 rounded-2xl shadow-2xl shadow-cyan-500/10 p-6 sm:p-8 w-full max-w-lg border border-slate-700 relative text-center">
+      <div className="bg-slate-800/80 backdrop-blur-lg rounded-2xl shadow-2xl shadow-cyan-500/10 p-6 sm:p-8 w-full max-w-lg border border-slate-700/50 relative text-center">
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-slate-500 hover:text-white transition-colors"
@@ -27,7 +27,7 @@ const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose, message, i
           Thank You!
         </h2>
         
-        <div className="mt-6 p-4 bg-slate-700/50 rounded-lg border border-slate-600 min-h-[120px] flex items-center justify-center">
+        <div className="mt-6 p-4 bg-slate-900/50 rounded-lg border border-slate-600 min-h-[120px] flex items-center justify-center">
           {isLoading ? (
              <div className="flex items-center justify-center space-x-2">
                 <div className="w-3 h-3 bg-cyan-400 rounded-full animate-pulse"></div>

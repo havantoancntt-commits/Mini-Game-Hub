@@ -150,22 +150,28 @@ const Game2048: React.FC<Game2048Props> = ({ onBack, onNewHighScore }) => {
   }, [handleKeyDown]);
 
   const tileColors: { [key: number]: string } = {
-    0: 'bg-slate-700', 2: 'bg-slate-600', 4: 'bg-slate-500',
+    0: 'bg-slate-700/80', 2: 'bg-slate-600', 4: 'bg-slate-500',
     8: 'bg-orange-500', 16: 'bg-orange-400', 32: 'bg-red-500',
     64: 'bg-red-400', 128: 'bg-yellow-500', 256: 'bg-yellow-400',
     512: 'bg-yellow-300', 1024: 'bg-teal-500',
     2048: 'bg-teal-400 animate-pulse-glow-yellow'
   };
 
+  const getTileTextSize = (val: number) => {
+    if (val >= 1024) return 'text-xl sm:text-2xl';
+    if (val >= 128) return 'text-2xl sm:text-3xl';
+    return 'text-3xl sm:text-4xl';
+  }
+
   return (
-    <div className="flex flex-col items-center p-4 w-full max-w-md mx-auto text-center animate-fade-in-up">
+    <div className="flex flex-col items-center p-6 sm:p-8 w-full max-w-sm mx-auto text-center bg-slate-800/60 backdrop-blur-md rounded-2xl border border-slate-700/50 animate-fade-in-up">
       <h2 className="text-4xl font-bold mb-2">2048</h2>
       <p className="text-slate-400 mb-4">Use arrow keys to slide and combine tiles.</p>
        <div className="flex gap-8 mb-4">
           <p>Score: <span key={scoreKey} className="font-bold text-cyan-400 animate-score-pop">{score}</span></p>
           <p>High Score: <span className="font-bold text-yellow-400">{highScore}</span></p>
       </div>
-      <div className="bg-slate-800 p-2 rounded-lg relative grid grid-cols-4 gap-2">
+      <div className="bg-slate-900/70 p-1 sm:p-2 rounded-lg relative grid grid-cols-4 gap-1 sm:gap-2 w-full">
         {isGameOver && (
           <div className="absolute inset-0 bg-black bg-opacity-70 flex flex-col items-center justify-center z-10 rounded-lg">
             <h3 className="text-3xl font-bold text-red-500 mb-4">Game Over!</h3>
@@ -176,8 +182,8 @@ const Game2048: React.FC<Game2048Props> = ({ onBack, onNewHighScore }) => {
           row.map((val, c) => (
             <div
               key={`${r}-${c}`}
-              className={`w-20 h-20 md:w-24 md:h-24 flex items-center justify-center rounded-md font-bold text-3xl
-                         transition-all duration-200 shadow-inner shadow-black/20 ${tileColors[val] || 'bg-teal-300'}`}
+              className={`aspect-square w-full flex items-center justify-center rounded-md font-bold
+                         transition-all duration-200 shadow-inner shadow-black/20 ${tileColors[val] || 'bg-teal-300'} ${getTileTextSize(val)}`}
             >
               {val > 0 && val}
             </div>
@@ -185,8 +191,9 @@ const Game2048: React.FC<Game2048Props> = ({ onBack, onNewHighScore }) => {
         )}
       </div>
 
-      <button onClick={onBack} className="mt-12 text-slate-400 hover:text-cyan-400 transition-colors">
-        &larr; Back to Menu
+      <button onClick={onBack} className="group mt-12 text-slate-400 hover:text-cyan-400 transition-colors flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+        <span>Back to Menu</span>
       </button>
     </div>
   );

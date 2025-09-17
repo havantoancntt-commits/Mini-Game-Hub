@@ -9,7 +9,6 @@ interface SnakeGameProps {
 }
 
 const GRID_SIZE = 20;
-const TILE_SIZE = 20; // in pixels
 
 type Direction = 'UP' | 'DOWN' | 'LEFT' | 'RIGHT';
 type Position = { x: number; y: number };
@@ -108,7 +107,7 @@ const SnakeGame: React.FC<SnakeGameProps> = ({ onBack, onNewHighScore }) => {
   useInterval(gameLoop, speed);
 
   return (
-    <div className="flex flex-col items-center p-4 w-full max-w-md mx-auto text-center animate-fade-in-up">
+    <div className="flex flex-col items-center p-6 sm:p-8 w-full max-w-md mx-auto text-center bg-slate-800/60 backdrop-blur-md rounded-2xl border border-slate-700/50 animate-fade-in-up">
       <h2 className="text-4xl font-bold mb-2">Classic Snake</h2>
       <p className="text-slate-400 mb-4">Use arrow keys to move the snake.</p>
       <div className="flex gap-8 mb-4">
@@ -117,11 +116,10 @@ const SnakeGame: React.FC<SnakeGameProps> = ({ onBack, onNewHighScore }) => {
       </div>
 
       <div
-        className="bg-slate-800 border-2 border-slate-600 relative"
-        style={{ width: GRID_SIZE * TILE_SIZE, height: GRID_SIZE * TILE_SIZE }}
+        className="bg-slate-900/70 border-2 border-slate-600 relative w-full aspect-square rounded-lg"
       >
         {isGameOver && (
-          <div className="absolute inset-0 bg-black bg-opacity-70 flex flex-col items-center justify-center z-10">
+          <div className="absolute inset-0 bg-black bg-opacity-70 flex flex-col items-center justify-center z-10 rounded-lg">
             <h3 className="text-3xl font-bold text-red-500 mb-4">Game Over</h3>
             <StyledButton onClick={resetGame}>Play Again</StyledButton>
           </div>
@@ -129,18 +127,29 @@ const SnakeGame: React.FC<SnakeGameProps> = ({ onBack, onNewHighScore }) => {
         {snake.map((segment, index) => (
           <div
             key={index}
-            className={`absolute ${index === 0 ? 'bg-green-400 shadow-[0_0_10px_theme(colors.green.400)]' : 'bg-green-600'}`}
-            style={{ left: segment.x * TILE_SIZE, top: segment.y * TILE_SIZE, width: TILE_SIZE, height: TILE_SIZE }}
+            className={`absolute rounded-sm ${index === 0 ? 'bg-green-400 shadow-[0_0_10px_theme(colors.green.400)]' : 'bg-green-600'}`}
+            style={{ 
+              left: `${(segment.x / GRID_SIZE) * 100}%`, 
+              top: `${(segment.y / GRID_SIZE) * 100}%`, 
+              width: `${100 / GRID_SIZE}%`, 
+              height: `${100 / GRID_SIZE}%`
+            }}
           />
         ))}
         <div
           className="absolute bg-red-500 rounded-full shadow-[0_0_10px_theme(colors.red.500)]"
-          style={{ left: food.x * TILE_SIZE, top: food.y * TILE_SIZE, width: TILE_SIZE, height: TILE_SIZE }}
+          style={{ 
+            left: `${(food.x / GRID_SIZE) * 100}%`, 
+            top: `${(food.y / GRID_SIZE) * 100}%`, 
+            width: `${100 / GRID_SIZE}%`, 
+            height: `${100 / GRID_SIZE}%`
+          }}
         />
       </div>
 
-      <button onClick={onBack} className="mt-12 text-slate-400 hover:text-cyan-400 transition-colors">
-        &larr; Back to Menu
+      <button onClick={onBack} className="group mt-12 text-slate-400 hover:text-cyan-400 transition-colors flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+        <span>Back to Menu</span>
       </button>
     </div>
   );

@@ -98,16 +98,11 @@ const App: React.FC = () => {
 
   const CurrentGame = useMemo(() => {
     if (!selectedGame) return null;
-    const Component = gameComponents[selectedGame];
-    return (
-        <div key={selectedGame} className="animate-fade-in w-full flex justify-center">
-            {Component}
-        </div>
-    );
+    return <div key={selectedGame}>{gameComponents[selectedGame]}</div>;
   }, [selectedGame, gameComponents]);
 
   return (
-    <div className="bg-slate-900 text-white min-h-screen flex flex-col font-sans">
+    <div className="bg-slate-900 text-white min-h-screen flex flex-col font-sans aurora-background">
       <div className="flex-grow flex flex-col items-center justify-center p-4 sm:p-6 md:p-8">
         <Header title="Mini-Game Hub" />
         <main className="w-full max-w-7xl mx-auto mt-8 flex-grow flex items-center justify-center">

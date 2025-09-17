@@ -95,7 +95,7 @@ const MemoryMatchGame: React.FC<MemoryMatchGameProps> = ({ onBack, onNewHighScor
   }
 
   return (
-    <div className="flex flex-col items-center p-4 w-full max-w-2xl mx-auto text-center animate-fade-in-up">
+    <div className="flex flex-col items-center p-6 sm:p-8 w-full max-w-md mx-auto text-center bg-slate-800/60 backdrop-blur-md rounded-2xl border border-slate-700/50 animate-fade-in-up">
       <h2 className="text-4xl font-bold mb-2">Memory Match</h2>
       <p className="text-slate-400 mb-6">Flip cards to find all matching pairs.</p>
       <div className="flex gap-8 mb-4">
@@ -110,11 +110,11 @@ const MemoryMatchGame: React.FC<MemoryMatchGameProps> = ({ onBack, onNewHighScor
             <StyledButton onClick={restartGame}>Play Again</StyledButton>
          </div>
       ) : (
-        <div className="grid grid-cols-4 gap-4">
+        <div className="grid grid-cols-4 gap-2 sm:gap-4 w-full">
             {cards.map((card, index) => (
             <div
                 key={card.id}
-                className="w-20 h-20 md:w-24 md:h-24 rounded-lg cursor-pointer transform-gpu"
+                className="aspect-square rounded-lg cursor-pointer transform-gpu"
                 style={{ perspective: '1000px' }}
                 onClick={() => handleCardClick(index)}
             >
@@ -123,10 +123,10 @@ const MemoryMatchGame: React.FC<MemoryMatchGameProps> = ({ onBack, onNewHighScor
                 style={{ transformStyle: 'preserve-3d', transform: card.isFlipped || card.isMatched ? 'rotateY(180deg)' : '' }}
                 >
                 <div className="absolute w-full h-full bg-slate-700 rounded-lg flex items-center justify-center" style={{ backfaceVisibility: 'hidden' }}>
-                    <span className="text-3xl">?</span>
+                    <span className="text-2xl sm:text-3xl">?</span>
                 </div>
                 <div className="absolute w-full h-full bg-slate-500 rounded-lg flex items-center justify-center" style={{ transform: 'rotateY(180deg)', backfaceVisibility: 'hidden' }}>
-                    <span className="text-4xl">{card.emoji}</span>
+                    <span className="text-3xl sm:text-4xl">{card.emoji}</span>
                 </div>
                 </div>
             </div>
@@ -134,8 +134,9 @@ const MemoryMatchGame: React.FC<MemoryMatchGameProps> = ({ onBack, onNewHighScor
         </div>
       )}
 
-      <button onClick={onBack} className="mt-12 text-slate-400 hover:text-cyan-400 transition-colors">
-        &larr; Back to Menu
+      <button onClick={onBack} className="group mt-12 text-slate-400 hover:text-cyan-400 transition-colors flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+        <span>Back to Menu</span>
       </button>
     </div>
   );
