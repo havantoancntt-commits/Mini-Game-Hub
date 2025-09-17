@@ -159,8 +159,8 @@ const BrickBreakerGame: React.FC<BrickBreakerGameProps> = ({ onBack, onNewHighSc
       <h2 className="text-4xl font-bold mb-2">Brick Breaker</h2>
       <p className="text-slate-400 mb-4">Move your mouse to control the paddle.</p>
        <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 mb-4 text-lg sm:text-xl">
-          <p>Score: <span key={scoreKey} className="font-bold text-cyan-400 animate-score-pop">{score}</span></p>
-          <p>Lives: <span className="font-bold text-red-400">{lives}</span></p>
+          <p aria-live="polite">Score: <span key={scoreKey} className="font-bold text-cyan-400 animate-score-pop">{score}</span></p>
+          <p aria-live="polite">Lives: <span className="font-bold text-red-400">{lives}</span></p>
           <p>High Score: <span className="font-bold text-yellow-400">{highScore}</span></p>
       </div>
 
@@ -169,7 +169,7 @@ const BrickBreakerGame: React.FC<BrickBreakerGameProps> = ({ onBack, onNewHighSc
         className="bg-slate-900/80 border-2 border-slate-600 relative overflow-hidden w-full aspect-[5/6] rounded-lg"
       >
          {(gameState !== 'playing') && (
-            <div className="absolute inset-0 bg-black bg-opacity-50 flex flex-col items-center justify-center z-20 rounded-lg">
+            <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-sm flex flex-col items-center justify-center z-20 rounded-lg">
             <h3 className="text-3xl font-bold text-white mb-4">
                 {gameState === 'over' ? `Game Over! Score: ${score}` : 'Ready?'}
             </h3>

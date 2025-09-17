@@ -117,13 +117,13 @@ const SimonSaysGame: React.FC<SimonSaysGameProps> = ({ onBack, onNewHighScore })
       <h2 className="text-4xl font-bold mb-2">Simon Says</h2>
       <p className="text-slate-400 mb-4">Repeat the sequence of colors.</p>
        <div className="flex gap-8 mb-4">
-          <p>Level: <span key={levelKey} className="font-bold text-cyan-400 animate-score-pop">{level}</span></p>
+          <p aria-live="polite">Level: <span key={levelKey} className="font-bold text-cyan-400 animate-score-pop">{level}</span></p>
           <p>High Score: <span className="font-bold text-yellow-400">{highScore}</span></p>
       </div>
 
       <div className="relative w-full max-w-xs sm:max-w-sm aspect-square">
         {gameState === 'idle' || gameState === 'over' ? (
-          <div className="absolute inset-0 bg-black bg-opacity-70 flex flex-col items-center justify-center z-10 rounded-full">
+          <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-sm flex flex-col items-center justify-center z-10 rounded-full">
             <h3 className="text-3xl font-bold text-white mb-4">{gameState === 'over' ? `Game Over! Level ${level}` : 'Ready?'}</h3>
             <StyledButton onClick={startGame}>
               {gameState === 'over' ? 'Play Again' : 'Start Game'}

@@ -168,12 +168,12 @@ const Game2048: React.FC<Game2048Props> = ({ onBack, onNewHighScore }) => {
       <h2 className="text-4xl font-bold mb-2">2048</h2>
       <p className="text-slate-400 mb-4">Use arrow keys to slide and combine tiles.</p>
        <div className="flex gap-8 mb-4">
-          <p>Score: <span key={scoreKey} className="font-bold text-cyan-400 animate-score-pop">{score}</span></p>
+          <p aria-live="polite">Score: <span key={scoreKey} className="font-bold text-cyan-400 animate-score-pop">{score}</span></p>
           <p>High Score: <span className="font-bold text-yellow-400">{highScore}</span></p>
       </div>
       <div className="bg-slate-900/70 p-1 sm:p-2 rounded-lg relative grid grid-cols-4 gap-1 sm:gap-2 w-full">
         {isGameOver && (
-          <div className="absolute inset-0 bg-black bg-opacity-70 flex flex-col items-center justify-center z-10 rounded-lg">
+          <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-sm flex flex-col items-center justify-center z-10 rounded-lg">
             <h3 className="text-3xl font-bold text-red-500 mb-4">Game Over!</h3>
             <StyledButton onClick={resetGame}>Try Again</StyledButton>
           </div>

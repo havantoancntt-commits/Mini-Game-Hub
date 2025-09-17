@@ -28,4 +28,4 @@ const StyledButton: React.FC<StyledButtonProps> = ({ children, onClick, ...props
   );
 };
 
-export default StyledButton;
+export default React.memo(StyledButton);

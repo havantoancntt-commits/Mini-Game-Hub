@@ -146,7 +146,7 @@ const FlappyBirdGame: React.FC<FlappyBirdGameProps> = ({ onBack, onNewHighScore 
       <h2 className="text-4xl font-bold mb-2">Flappy Bird</h2>
       <p className="text-slate-400 mb-4">Click or press Space to flap.</p>
        <div className="flex gap-8 mb-4">
-          <p>Score: <span key={scoreKey} className="font-bold text-cyan-400 animate-score-pop">{score}</span></p>
+          <p aria-live="polite">Score: <span key={scoreKey} className="font-bold text-cyan-400 animate-score-pop">{score}</span></p>
           <p>High Score: <span className="font-bold text-yellow-400">{highScore}</span></p>
       </div>
 
@@ -157,7 +157,7 @@ const FlappyBirdGame: React.FC<FlappyBirdGameProps> = ({ onBack, onNewHighScore 
         onKeyDown={(e) => e.key === ' ' && jump()}
       >
         {(gameState === 'idle' || gameState === 'over') && (
-            <div className="absolute inset-0 bg-black bg-opacity-50 flex flex-col items-center justify-center z-20">
+            <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-sm flex flex-col items-center justify-center z-20">
             <h3 className="text-3xl font-bold text-white mb-4">{gameState === 'over' ? 'Game Over' : 'Ready?'}</h3>
             <StyledButton onClick={(e) => { e.stopPropagation(); jump(); }}>
                 {gameState === 'over' ? 'Try Again' : 'Start Game'}

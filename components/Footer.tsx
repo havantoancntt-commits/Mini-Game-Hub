@@ -26,4 +26,4 @@ const Footer: React.FC<FooterProps> = ({ onSupportClick }) => {
   );
 };
 
-export default Footer;
+export default React.memo(Footer);

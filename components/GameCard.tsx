@@ -12,7 +12,8 @@ const GameCard: React.FC<GameCardProps> = ({ title, description, icon, onSelect 
     <div 
       className="group bg-slate-800/60 backdrop-blur-md rounded-xl p-4 sm:p-6 flex flex-col items-center text-center cursor-pointer
                  border border-slate-700/80 hover:border-cyan-400/60 transition-all duration-300 h-full
-                 transform hover:scale-105 hover:shadow-[0_0_40px_hsla(188,83%,47%,0.3)]"
+                 transform hover:scale-105 hover:shadow-[0_0_40px_hsla(188,83%,47%,0.3)]
+                 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 focus-visible:ring-cyan-400"
       onClick={onSelect}
       role="button"
       tabIndex={0}
@@ -27,4 +28,4 @@ const GameCard: React.FC<GameCardProps> = ({ title, description, icon, onSelect 
   );
 };
 
-export default GameCard;
+export default React.memo(GameCard);

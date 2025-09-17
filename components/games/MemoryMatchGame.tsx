@@ -99,7 +99,7 @@ const MemoryMatchGame: React.FC<MemoryMatchGameProps> = ({ onBack, onNewHighScor
       <h2 className="text-4xl font-bold mb-2">Memory Match</h2>
       <p className="text-slate-400 mb-6">Flip cards to find all matching pairs.</p>
       <div className="flex gap-8 mb-4">
-        <p className="text-lg">Moves: <span key={movesKey} className="font-bold text-cyan-400 animate-score-pop">{moves}</span></p>
+        <p className="text-lg" aria-live="polite">Moves: <span key={movesKey} className="font-bold text-cyan-400 animate-score-pop">{moves}</span></p>
         {bestScore && <p className="text-lg">Best: <span className="font-bold text-yellow-400">{bestScore}</span></p>}
       </div>
 

@@ -114,7 +114,7 @@ const TypingSpeedGame: React.FC<TypingSpeedGameProps> = ({ onBack, onNewHighScor
       />
       
       {isFinished ? (
-        <div className="mt-8 text-center animate-fade-in">
+        <div className="mt-8 text-center animate-fade-in" aria-live="polite">
           <h3 className="text-3xl font-bold text-cyan-400 mb-4">Results</h3>
           <div className="flex flex-col sm:flex-row justify-center items-center gap-4 sm:gap-8 text-white">
             <div className="w-full sm:w-auto">

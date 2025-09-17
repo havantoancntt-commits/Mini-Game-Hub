@@ -87,8 +87,8 @@ const WordScrambleGame: React.FC<WordScrambleGameProps> = ({ onBack, onNewHighSc
           <p className="text-slate-400 mb-4">Unscramble the letters to form a word.</p>
 
            <div className="flex gap-8 mb-4 text-xl">
-                <p>Score: <span key={scoreKey} className="font-bold text-cyan-400 animate-score-pop">{score}</span></p>
-                <p>Time: <span className="font-bold text-red-400">{timeLeft}</span></p>
+                <p aria-live="polite">Score: <span key={scoreKey} className="font-bold text-cyan-400 animate-score-pop">{score}</span></p>
+                <p aria-live="polite" aria-atomic="true">Time: <span className="font-bold text-red-400">{timeLeft}</span></p>
             </div>
             <p className="mb-4 text-lg">High Score: <span className="font-bold text-yellow-400">{highScore}</span></p>
 

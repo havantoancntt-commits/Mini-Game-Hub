@@ -90,14 +90,14 @@ const WhackAMoleGame: React.FC<WhackAMoleGameProps> = ({ onBack, onNewHighScore 
       <p className="text-slate-400 mb-4">Click the moles as fast as you can!</p>
       
       <div className="flex gap-8 mb-4 text-xl">
-        <p>Score: <span key={scoreKey} className="font-bold text-cyan-400 animate-score-pop">{score}</span></p>
-        <p>Time Left: <span className="font-bold text-red-400">{timeLeft}</span></p>
+        <p aria-live="polite">Score: <span key={scoreKey} className="font-bold text-cyan-400 animate-score-pop">{score}</span></p>
+        <p aria-live="polite" aria-atomic="true">Time Left: <span className="font-bold text-red-400">{timeLeft}</span></p>
       </div>
        <p className="mb-4 text-lg">High Score: <span className="font-bold text-yellow-400">{highScore}</span></p>
 
       <div className="relative w-full max-w-xs sm:max-w-sm aspect-square bg-green-800/70 rounded-lg p-2">
          {(gameState === 'idle' || gameState === 'over') && (
-            <div className="absolute inset-0 bg-black bg-opacity-70 flex flex-col items-center justify-center z-10 rounded-lg">
+            <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-sm flex flex-col items-center justify-center z-10 rounded-lg">
                 <h3 className="text-3xl font-bold text-white mb-4">
                     {gameState === 'over' ? `Time's Up! Score: ${score}` : 'Ready?'}
                 </h3>
