@@ -7,6 +7,13 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Preload critical resources for faster startup -->
+    <link rel="modulepreload" href="/index.tsx" />
+    <link rel="modulepreload" href="https://aistudiocdn.com/react@19.1.1" />
+    <link rel="modulepreload" href="https://aistudiocdn.com/react-dom@19.1.1" />
+    <link rel="preload" href="https://cdn.tailwindcss.com" as="script" />
+
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
       body {

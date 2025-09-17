@@ -1,6 +1,5 @@
 import React, { useState, useMemo, useCallback, lazy, Suspense } from 'react';
 import { GameId } from './types';
-import { GoogleGenAI, type GenerateContentResponse } from '@google/genai';
 
 // Components
 import Header from './components/Header';
@@ -40,8 +39,6 @@ const StackNBalanceGame = lazy(() => import('./components/games/StackNBalanceGam
 const PathFinderGame = lazy(() => import('./components/games/PathFinderGame'));
 
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY! });
-
 const App: React.FC = () => {
   const [selectedGame, setSelectedGame] = useState<GameId | null>(null);
   const [isDonateModalOpen, setIsDonateModalOpen] = useState(false);
@@ -62,9 +59,12 @@ const App: React.FC = () => {
     setIsDonateModalOpen(true);
 
     try {
+      const { GoogleGenAI } = await import('@google/genai');
+      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY! });
+      
       const prompt = `A player just set a new high score of ${score} in the game "${gameName}". Write a short, exciting, and congratulatory message (2-3 sentences). Then, humbly ask if they would consider a small donation to support the ad-free development of the game hub.`;
       
-      const result: GenerateContentResponse = await ai.models.generateContent({
+      const result = await ai.models.generateContent({
         model: 'gemini-2.5-flash',
         contents: prompt,
       });
