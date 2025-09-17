@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="UTF-T" />
+    <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Mini Game Hub</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -58,38 +58,38 @@
       }
       .text-3d-glow {
         text-shadow: 
-          0 0 5px theme('colors.cyan.400/50%'),
-          0 0 10px theme('colors.cyan.400/40%'),
-          0 0 20px theme('colors.fuchsia.500/30%'),
-          0 0 40px theme('colors.fuchsia.500/20%');
+          0 0 5px hsla(190, 80%, 60%, 0.5),
+          0 0 10px hsla(190, 80%, 60%, 0.4),
+          0 0 20px hsla(286, 81%, 58%, 0.3),
+          0 0 40px hsla(286, 81%, 58%, 0.2);
       }
        @keyframes pulse-glow-cyan {
-        0%, 100% { box-shadow: 0 0 20px theme('colors.cyan.500/30%'); }
-        50% { box-shadow: 0 0 40px theme('colors.cyan.500/70%'); }
+        0%, 100% { box-shadow: 0 0 20px hsla(188, 95%, 41%, 0.3); }
+        50% { box-shadow: 0 0 40px hsla(188, 95%, 41%, 0.7); }
       }
       .animate-pulse-glow-cyan {
         animation: pulse-glow-cyan 2s infinite ease-in-out;
       }
       @keyframes pulse-glow-emerald {
-        0%, 100% { box-shadow: 0 0 25px theme('colors.emerald.500/40%'); }
-        50% { box-shadow: 0 0 50px theme('colors.emerald.500/80%'); }
+        0%, 100% { box-shadow: 0 0 25px hsla(158, 82%, 40%, 0.4); }
+        50% { box-shadow: 0 0 50px hsla(158, 82%, 40%, 0.8); }
       }
       .animate-pulse-glow-emerald {
         animation: pulse-glow-emerald 1.5s infinite ease-in-out;
       }
        @keyframes pulse-glow-yellow {
-        0%, 100% { box-shadow: 0 0 25px theme('colors.yellow.400/40%'); }
-        50% { box-shadow: 0 0 50px theme('colors.yellow.400/80%'); }
+        0%, 100% { box-shadow: 0 0 25px hsla(50, 96%, 53%, 0.4); }
+        50% { box-shadow: 0 0 50px hsla(50, 96%, 53%, 0.8); }
       }
       .animate-pulse-glow-yellow {
         animation: pulse-glow-yellow 2s infinite ease-in-out;
       }
       @keyframes pulse-glow-subtle {
         0%, 100% {
-          box-shadow: 0 0 10px theme('colors.cyan.500/30%'), 0 0 12px theme('colors.fuchsia.500/20%');
+          box-shadow: 0 0 10px hsla(188, 95%, 41%, 0.3), 0 0 12px hsla(286, 81%, 58%, 0.2);
         }
         50% {
-          box-shadow: 0 0 25px theme('colors.cyan.500/60%'), 0 0 30px theme('colors.fuchsia.500/40%');
+          box-shadow: 0 0 25px hsla(188, 95%, 41%, 0.6), 0 0 30px hsla(286, 81%, 58%, 0.4);
         }
       }
       .animate-pulse-glow-subtle {

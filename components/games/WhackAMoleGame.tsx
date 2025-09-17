@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import StyledButton from '../StyledButton';
 import useLocalStorage from '../../hooks/useLocalStorage';
 import { playSuccessSound, playGameOverSound } from '../../utils/audio';
-import moleImg from './assets/mole.png'; // Assuming you have a mole image
 
 interface WhackAMoleGameProps {
   onBack: () => void;

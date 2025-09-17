@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, lazy, Suspense } from 'react';
 import { GameId } from './types';
 import { GoogleGenAI, GenerateContentResponse } from '@google/genai';
 
@@ -8,27 +8,36 @@ import GameMenu from './components/GameMenu';
 import Footer from './components/Footer';
 import SupportModal from './components/SupportModal';
 
-// Game Components
-import ReactionTimeGame from './components/games/ReactionTimeGame';
-import MemoryMatchGame from './components/games/MemoryMatchGame';
-import TypingSpeedGame from './components/games/TypingSpeedGame';
-import WordScrambleGame from './components/games/WordScrambleGame';
-import SnakeGame from './components/games/SnakeGame';
-import SimonSaysGame from './components/games/SimonSaysGame';
-import WhackAMoleGame from './components/games/WhackAMoleGame';
-import BrickBreakerGame from './components/games/BrickBreakerGame';
-import Game2048 from './components/games/Game2048';
-import FlappyBirdGame from './components/games/FlappyBirdGame';
-import RhythmOrbGame from './components/games/RhythmOrbGame';
-import GravityShiftGame from './components/games/GravityShiftGame';
-import ColorFusionGame from './components/games/ColorFusionGame';
-import EchoMazeGame from './components/games/EchoMazeGame';
-import AstroDriftGame from './components/games/AstroDriftGame';
-import CodeBreakerAIGame from './components/games/CodeBreakerAIGame';
-import GlyphPainterGame from './components/games/GlyphPainterGame';
-import TimeWarpPinballGame from './components/games/TimeWarpPinballGame';
-import StackNBalanceGame from './components/games/StackNBalanceGame';
-import PathFinderGame from './components/games/PathFinderGame';
+// Spinner component for Suspense fallback
+const GameLoadingSpinner: React.FC = () => (
+  <div className="flex flex-col items-center justify-center text-center p-8">
+    <div className="w-16 h-16 border-4 border-dashed rounded-full animate-spin border-cyan-400" role="status" aria-label="Loading"></div>
+    <p className="mt-4 text-lg text-slate-300">Loading Game...</p>
+  </div>
+);
+
+// Lazy-loaded Game Components
+const ReactionTimeGame = lazy(() => import('./components/games/ReactionTimeGame'));
+const MemoryMatchGame = lazy(() => import('./components/games/MemoryMatchGame'));
+const TypingSpeedGame = lazy(() => import('./components/games/TypingSpeedGame'));
+const WordScrambleGame = lazy(() => import('./components/games/WordScrambleGame'));
+const SnakeGame = lazy(() => import('./components/games/SnakeGame'));
+const SimonSaysGame = lazy(() => import('./components/games/SimonSaysGame'));
+const WhackAMoleGame = lazy(() => import('./components/games/WhackAMoleGame'));
+const BrickBreakerGame = lazy(() => import('./components/games/BrickBreakerGame'));
+const Game2048 = lazy(() => import('./components/games/Game2048'));
+const FlappyBirdGame = lazy(() => import('./components/games/FlappyBirdGame'));
+const RhythmOrbGame = lazy(() => import('./components/games/RhythmOrbGame'));
+const GravityShiftGame = lazy(() => import('./components/games/GravityShiftGame'));
+const ColorFusionGame = lazy(() => import('./components/games/ColorFusionGame'));
+const EchoMazeGame = lazy(() => import('./components/games/EchoMazeGame'));
+const AstroDriftGame = lazy(() => import('./components/games/AstroDriftGame'));
+const CodeBreakerAIGame = lazy(() => import('./components/games/CodeBreakerAIGame'));
+const GlyphPainterGame = lazy(() => import('./components/games/GlyphPainterGame'));
+const TimeWarpPinballGame = lazy(() => import('./components/games/TimeWarpPinballGame'));
+const StackNBalanceGame = lazy(() => import('./components/games/StackNBalanceGame'));
+const PathFinderGame = lazy(() => import('./components/games/PathFinderGame'));
+
 
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY! });
 
@@ -106,7 +115,13 @@ const App: React.FC = () => {
       <div className="flex-grow flex flex-col items-center justify-center p-4 sm:p-6 md:p-8">
         <Header title="Mini-Game Hub" />
         <main className="w-full max-w-7xl mx-auto mt-8 flex-grow flex items-center justify-center">
-          {CurrentGame ? CurrentGame : <GameMenu onSelectGame={handleSelectGame} />}
+          {CurrentGame ? (
+            <Suspense fallback={<GameLoadingSpinner />}>
+              {CurrentGame}
+            </Suspense>
+          ) : (
+            <GameMenu onSelectGame={handleSelectGame} />
+          )}
         </main>
       </div>
       <Footer onSupportClick={openSupportModalWithGenericMessage} />
