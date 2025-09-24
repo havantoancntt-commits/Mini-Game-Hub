@@ -27,16 +27,7 @@ const WhackAMoleGame = lazy(() => import('./components/games/WhackAMoleGame'));
 const BrickBreakerGame = lazy(() => import('./components/games/BrickBreakerGame'));
 const Game2048 = lazy(() => import('./components/games/Game2048'));
 const FlappyBirdGame = lazy(() => import('./components/games/FlappyBirdGame'));
-const RhythmOrbGame = lazy(() => import('./components/games/RhythmOrbGame'));
-const GravityShiftGame = lazy(() => import('./components/games/GravityShiftGame'));
-const ColorFusionGame = lazy(() => import('./components/games/ColorFusionGame'));
-const EchoMazeGame = lazy(() => import('./components/games/EchoMazeGame'));
-const AstroDriftGame = lazy(() => import('./components/games/AstroDriftGame'));
 const CodeBreakerAIGame = lazy(() => import('./components/games/CodeBreakerAIGame'));
-const GlyphPainterGame = lazy(() => import('./components/games/GlyphPainterGame'));
-const TimeWarpPinballGame = lazy(() => import('./components/games/TimeWarpPinballGame'));
-const StackNBalanceGame = lazy(() => import('./components/games/StackNBalanceGame'));
-const PathFinderGame = lazy(() => import('./components/games/PathFinderGame'));
 
 
 const App: React.FC = () => {
@@ -94,16 +85,7 @@ const App: React.FC = () => {
     'brick-breaker': <BrickBreakerGame onBack={handleBackToMenu} onNewHighScore={handleNewHighScore} />,
     'game-2048': <Game2048 onBack={handleBackToMenu} onNewHighScore={handleNewHighScore} />,
     'flappy-bird': <FlappyBirdGame onBack={handleBackToMenu} onNewHighScore={handleNewHighScore} />,
-    'rhythm-orb': <RhythmOrbGame onBack={handleBackToMenu} />,
-    'gravity-shift': <GravityShiftGame onBack={handleBackToMenu} />,
-    'color-fusion': <ColorFusionGame onBack={handleBackToMenu} />,
-    'echo-maze': <EchoMazeGame onBack={handleBackToMenu} />,
-    'astro-drift': <AstroDriftGame onBack={handleBackToMenu} />,
-    'code-breaker-ai': <CodeBreakerAIGame onBack={handleBackToMenu} />,
-    'glyph-painter': <GlyphPainterGame onBack={handleBackToMenu} />,
-    'time-warp-pinball': <TimeWarpPinballGame onBack={handleBackToMenu} />,
-    'stack-n-balance': <StackNBalanceGame onBack={handleBackToMenu} />,
-    'path-finder': <PathFinderGame onBack={handleBackToMenu} />,
+    'code-breaker-ai': <CodeBreakerAIGame onBack={handleBackToMenu} onNewHighScore={handleNewHighScore} />,
   }), [handleNewHighScore, handleBackToMenu]);
 
   const CurrentGame = useMemo(() => {

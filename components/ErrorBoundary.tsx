@@ -1,4 +1,4 @@
-import React, { Component, ErrorInfo, ReactNode } from 'react';
+import React, { ErrorInfo, ReactNode } from 'react';
 import StyledButton from './StyledButton';
 
 interface Props {
@@ -9,7 +9,9 @@ interface State {
   hasError: boolean;
 }
 
-class ErrorBoundary extends Component<Props, State> {
+// FIX: Changed `extends Component<Props, State>` to `extends React.Component<Props, State>`
+// to avoid potential import shadowing issues with the `Component` identifier.
+class ErrorBoundary extends React.Component<Props, State> {
   public state: State = {
     hasError: false
   };
