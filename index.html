@@ -8,7 +8,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=swap" rel="stylesheet">
     
-    <!-- Preload critical resources for faster startup -->
     <link rel="modulepreload" href="/index.tsx" />
     <link rel="modulepreload" href="https://aistudiocdn.com/react@19.1.1" />
     <link rel="modulepreload" href="https://aistudiocdn.com/react-dom@19.1.1" />
@@ -16,11 +15,29 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+      :root {
+        --bg-color: #0A0F1F;
+        --cyan-glow: hsla(188, 95%, 41%, 0.5);
+        --fuchsia-glow: hsla(286, 81%, 58%, 0.4);
+      }
       body {
         font-family: 'Inter', sans-serif;
-        background-color: #0f172a; /* bg-slate-900 */
+        background-color: var(--bg-color);
+        color: #e2e8f0; /* text-slate-200 */
+        overflow: hidden;
       }
-      /* Initial App Loader - Fixes "black screen" on load */
+      #root {
+        position: relative;
+        z-index: 1;
+      }
+      .background-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 0;
+      }
       #root:empty {
         display: flex;
         justify-content: center;
@@ -39,47 +56,16 @@
       @keyframes spin {
         to { transform: rotate(360deg); }
       }
-
+      
       ::selection {
         background-color: hsla(188, 95%, 41%, 0.3);
       }
-      @keyframes fade-in {
-        from { opacity: 0; }
-        to { opacity: 1; }
-      }
-      .animate-fade-in {
-        animation: fade-in 0.5s ease-out forwards;
-      }
-      @keyframes fade-in-up {
-        from {
-          opacity: 0;
-          transform: translateY(20px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-      .animate-fade-in-up {
-        animation: fade-in-up 0.5s ease-out forwards;
-      }
-      @keyframes score-pop {
-        0% { transform: scale(1); }
-        50% { transform: scale(1.25); }
-        100% { transform: scale(1); }
-      }
-      .animate-score-pop {
-        animation: score-pop 0.3s ease-out;
-      }
-      @keyframes aurora {
-        from {
-            background-position: 0% 50%;
-        }
-        to {
-            background-position: 100% 50%;
-        }
-      }
+      
+      /* New Background Effects */
       .aurora-background {
+        position: absolute;
+        width: 100%;
+        height: 100%;
         --aurora-color-1: hsla(212, 85%, 55%, 0.1);
         --aurora-color-2: hsla(289, 75%, 50%, 0.1);
         --aurora-color-3: hsla(180, 75%, 50%, 0.1);
@@ -91,6 +77,55 @@
           radial-gradient(at 80% 80%, var(--aurora-color-4) 0px, transparent 50%);
         background-size: 200% 200%;
         animation: aurora 30s infinite linear;
+        opacity: 0.6;
+      }
+      @keyframes aurora {
+        from { background-position: 0% 50%; }
+        to { background-position: 100% 50%; }
+      }
+      
+      .background-grid {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background-image: repeating-conic-gradient(from 45deg, #0A0F1F 0% 25%, transparent 25% 50%);
+        background-size: 50px 50px;
+        opacity: 0.2;
+        animation: grid-pan 60s linear infinite;
+      }
+      @keyframes grid-pan {
+        from { background-position: 0 0; }
+        to { background-position: -500px -500px; }
+      }
+      
+      /* Refined Animations */
+      @keyframes fade-in {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+      .animate-fade-in {
+        animation: fade-in 0.6s ease-out forwards;
+      }
+      @keyframes fade-in-up {
+        from {
+          opacity: 0;
+          transform: translateY(24px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .animate-fade-in-up {
+        animation: fade-in-up 0.6s cubic-bezier(0.215, 0.610, 0.355, 1.000) forwards;
+      }
+      @keyframes score-pop {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.25); }
+        100% { transform: scale(1); }
+      }
+      .animate-score-pop {
+        animation: score-pop 0.3s ease-out;
       }
 
       @keyframes shimmer {
@@ -101,45 +136,22 @@
         background-size: 200% auto;
         animation: shimmer 5s linear infinite;
       }
-
-      .text-3d-glow {
+      
+      .text-glow {
         text-shadow: 
-          0 0 4px hsla(190, 80%, 60%, 0.3),
-          0 0 8px hsla(190, 80%, 60%, 0.2),
-          0 0 16px hsla(286, 81%, 58%, 0.2),
-          0 0 32px hsla(286, 81%, 58%, 0.1);
+          0 0 5px hsla(190, 80%, 60%, 0.4),
+          0 0 10px hsla(190, 80%, 60%, 0.3),
+          0 0 20px var(--fuchsia-glow);
       }
-       @keyframes pulse-glow-cyan {
-        0%, 100% { box-shadow: 0 0 15px hsla(188, 95%, 41%, 0.2); }
-        50% { box-shadow: 0 0 30px hsla(188, 95%, 41%, 0.5); }
+      
+      /* Float animation for game card */
+      @keyframes float {
+        0% { transform: translateY(0px); }
+        50% { transform: translateY(-8px); }
+        100% { transform: translateY(0px); }
       }
-      .animate-pulse-glow-cyan {
-        animation: pulse-glow-cyan 2s infinite ease-in-out;
-      }
-      @keyframes pulse-glow-emerald {
-        0%, 100% { box-shadow: 0 0 20px hsla(158, 82%, 40%, 0.3); }
-        50% { box-shadow: 0 0 40px hsla(158, 82%, 40%, 0.6); }
-      }
-      .animate-pulse-glow-emerald {
-        animation: pulse-glow-emerald 1.5s infinite ease-in-out;
-      }
-       @keyframes pulse-glow-yellow {
-        0%, 100% { box-shadow: 0 0 20px hsla(50, 96%, 53%, 0.3); }
-        50% { box-shadow: 0 0 40px hsla(50, 96%, 53%, 0.6); }
-      }
-      .animate-pulse-glow-yellow {
-        animation: pulse-glow-yellow 2s infinite ease-in-out;
-      }
-      @keyframes pulse-glow-subtle {
-        0%, 100% {
-          box-shadow: 0 0 10px hsla(188, 95%, 41%, 0.3), 0 0 12px hsla(286, 81%, 58%, 0.2);
-        }
-        50% {
-          box-shadow: 0 0 25px hsla(188, 95%, 41%, 0.6), 0 0 30px hsla(286, 81%, 58%, 0.4);
-        }
-      }
-      .animate-pulse-glow-subtle {
-        animation: pulse-glow-subtle 3s infinite ease-in-out;
+      .animate-float {
+         animation: float 4s ease-in-out infinite;
       }
     </style>
   <script type="importmap">
@@ -155,6 +167,10 @@
 </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div class="background-container">
+      <div class="aurora-background"></div>
+      <div class="background-grid"></div>
+    </div>
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>
   </body>

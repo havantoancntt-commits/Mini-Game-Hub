@@ -6,21 +6,18 @@ interface FooterProps {
 
 const Footer: React.FC<FooterProps> = ({ onSupportClick }) => {
   return (
-    <footer className="w-full text-center p-4 sm:p-6 text-slate-500 border-t border-slate-800/80 bg-slate-900/50 backdrop-blur-sm">
-      <div className="max-w-7xl mx-auto flex flex-col justify-center items-center gap-4">
-        <p className="max-w-2xl">
-          Enjoying the games? This hub is a passion project, kept alive and ad-free by awesome people like you.
+    <footer className="w-full text-center p-4 text-slate-500 animate-fade-in">
+      <div className="max-w-7xl mx-auto flex flex-col justify-center items-center gap-2">
+        <p className="max-w-2xl text-sm">
+          This hub is a passion project. Consider supporting its development.
+           <button 
+              onClick={onSupportClick} 
+              className="ml-2 font-semibold text-cyan-400 hover:text-cyan-300 transition-colors underline underline-offset-2"
+            >
+              Support Here
+            </button>
         </p>
-        <button 
-          onClick={onSupportClick} 
-          className="px-6 py-2 font-bold text-white bg-gradient-to-r from-cyan-500 to-fuchsia-500 rounded-lg 
-                     shadow-lg shadow-cyan-500/20 transform transition-all duration-300
-                     focus:outline-none focus:ring-4 focus:ring-offset-2 focus:ring-offset-slate-900 
-                     focus:ring-cyan-300 animate-pulse-glow-subtle hover:brightness-110"
-        >
-          Support the Developer
-        </button>
-         <p className="text-sm mt-4">&copy; {new Date().getFullYear()} Mini-Game Hub. All Rights Reserved.</p>
+         <p className="text-xs mt-2">&copy; {new Date().getFullYear()} Mini-Game Hub. All Rights Reserved.</p>
       </div>
     </footer>
   );

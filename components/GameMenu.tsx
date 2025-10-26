@@ -2,35 +2,30 @@ import React from 'react';
 import { GameId } from '../types';
 import GameCard from './GameCard';
 
-// Simple SVG icons to avoid external dependencies
-const BoltIcon = <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>;
-const CpuChipIcon = <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M12 6V4m0 16v-2M8 8a2 2 0 012-2h4a2 2 0 012 2v8a2 2 0 01-2 2H10a2 2 0 01-2-2V8z" /></svg>;
-const ChartBarIcon = <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>;
-const PuzzlePieceIcon = <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z" /></svg>;
-const SparklesIcon = <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg>;
-const CubeIcon = <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>;
-const HandIcon = <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11" /></svg>;
-const TableCellsIcon = <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" /></svg>;
-const Game2048Icon = <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h12a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 12h4m-4 4h4m-4-8h4" /></svg>;
-const PaperAirplaneIcon = <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>;
-const KeyIcon = <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2v5a2 2 0 01-2 2H9a2 2 0 01-2-2V9a2 2 0 012-2h6zM15 7V5a2 2 0 00-2-2H9a2 2 0 00-2 2v2M12 11h.01" /></svg>;
+const JumpIcon = (
+    <div className="relative h-16 w-16 text-cyan-400">
+        <div className="absolute top-4 left-4 w-5 h-5 bg-current rounded-sm animate-bounce" style={{animationDuration: '1.2s', animationIterationCount: 'infinite'}}></div>
+        <div className="absolute bottom-2 left-0 w-full h-0.5 bg-slate-500"></div>
+        <div 
+            className="absolute bottom-2.5 left-[65%] w-0 h-0 
+                       border-l-[12px] border-l-transparent 
+                       border-r-[12px] border-r-transparent 
+                       border-b-[12px] border-b-red-500"
+        ></div>
+         <div 
+            className="absolute bottom-2.5 left-[35%] w-0 h-0 
+                       border-l-8 border-l-transparent 
+                       border-r-8 border-r-transparent 
+                       border-b-8 border-b-red-500"
+        ></div>
+    </div>
+);
 
-const gameCategories: Record<string, { id: GameId; title: string; description: string; icon: React.ReactNode }[]> = {
-  'Reflex & Speed': [
-    { id: 'reaction-time', title: 'Reaction Time', description: 'Test your reflexes. Click when the box turns green!', icon: BoltIcon },
-    { id: 'typing-speed', title: 'Typing Speed', description: 'How fast can you type? Test your WPM.', icon: ChartBarIcon },
-    { id: 'whack-a-mole', title: 'Whack-A-Mole', description: 'Moles are popping up! Whack them quickly.', icon: HandIcon },
-    { id: 'flappy-bird', title: 'Flappy Bird', description: 'Flap through the pipes and get the high score.', icon: PaperAirplaneIcon },
-    { id: 'snake', title: 'Classic Snake', description: 'Eat food, grow your snake, and avoid the walls.', icon: CubeIcon },
-    { id: 'brick-breaker', title: 'Brick Breaker', description: 'Break all the bricks with the ball and paddle.', icon: TableCellsIcon },
-  ],
-  'Puzzles & Strategy': [
-    { id: 'memory-match', title: 'Memory Match', description: 'Flip cards and find all the matching pairs.', icon: CpuChipIcon },
-    { id: 'word-scramble', title: 'Word Scramble', description: 'Unscramble letters to find the hidden word.', icon: PuzzlePieceIcon },
-    { id: 'simon-says', title: 'Simon Says', description: 'Follow the sequence of colors and sounds.', icon: SparklesIcon },
-    { id: 'game-2048', title: '2048', description: 'Slide tiles to combine them and reach 2048.', icon: Game2048Icon },
-    { id: 'code-breaker-ai', title: 'Code Breaker AI', description: 'Outsmart the Gemini AI by cracking its secret code.', icon: KeyIcon },
-  ]
+const game: { id: GameId; title: string; description: string; icon: React.ReactNode } = {
+  id: 'impossible-jump',
+  title: "The Impossible Jump",
+  description: "A brutally difficult, minimalist reflex game. Can you clear even one spike?",
+  icon: JumpIcon,
 };
 
 interface GameMenuProps {
@@ -39,30 +34,20 @@ interface GameMenuProps {
 
 const GameMenu: React.FC<GameMenuProps> = ({ onSelectGame }) => {
   return (
-    <div className="w-full animate-fade-in">
-      {Object.entries(gameCategories).map(([category, games], categoryIndex) => (
-        <section key={category} className={categoryIndex > 0 ? 'mt-12' : ''}>
-          <h2 className="text-2xl sm:text-3xl font-bold text-center mb-6 sm:mb-8 text-slate-300 tracking-wider border-b-2 border-slate-700 pb-3">
-            {category}
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-            {games.map((game, index) => (
-              <div
-                key={game.id}
-                className="animate-fade-in-up"
-                style={{ animationDelay: `${index * 50}ms`, animationFillMode: 'backwards' }}
-              >
-                <GameCard
-                  title={game.title}
-                  description={game.description}
-                  icon={game.icon}
-                  onSelect={() => onSelectGame(game.id)}
-                />
-              </div>
-            ))}
-          </div>
-        </section>
-      ))}
+    <div className="w-full flex flex-col justify-center items-center animate-fade-in p-4 sm:p-6">
+      <h2 className="text-3xl font-bold text-slate-300 mb-2 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>Game Selection</h2>
+      <p className="text-slate-500 mb-8 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>Choose a game to begin</p>
+      <div
+        className="animate-fade-in-up w-full max-w-xs sm:max-w-sm"
+        style={{ animationDelay: '0.4s' }}
+      >
+        <GameCard
+          title={game.title}
+          description={game.description}
+          icon={game.icon}
+          onSelect={() => onSelectGame(game.id)}
+        />
+      </div>
     </div>
   );
 };

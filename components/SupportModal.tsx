@@ -85,7 +85,7 @@ const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose, message, i
           id="support-modal-title"
           className="text-2xl sm:text-3xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-fuchsia-500"
         >
-          Thank You!
+          Support This Project
         </h2>
         
         <div className="mt-6 p-4 bg-slate-900/50 rounded-lg border border-slate-600 min-h-[120px] flex items-center justify-center">
